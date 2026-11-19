@@ -1,3 +1,6 @@
+import { HTTPClient } from "@openrouter/sdk";
+import { isAbortError, isTimeoutError } from "@openrouter/sdk/lib/http";
+import { ConnectionError } from "@openrouter/sdk/models/errors";
 import { isString } from "@small-rules/arktype-utilities";
 import { type } from "arktype";
 
@@ -87,8 +90,31 @@ function toDecisionQuestions(questions: Readonly<Record<string, DecisionQuestion
 export function createOpenRouterClientOptions(apiKey: string): SDKOptions {
 	return {
 		apiKey,
+		httpClient: new HTTPClient({ fetcher: fetchWithConnectionErrorsAsync }),
 		retryConfig: { backoff: { ...requestRetryBackoff }, retryConnectionErrors: true, strategy: "backoff" },
 	};
+}
+
+/**
+ * Calls the global `fetch`. `fetch` rejects only on a network failure, an
+ * abort, or a timeout, so any other rejection (such as Bun's EPROTO TLS
+ * error, which the SDK does not recognize) becomes a `ConnectionError` that
+ * the SDK retries. The original error stays as its `cause`.
+ *
+ * @param request - The request the SDK built.
+ * @returns The response.
+ * @rejects {ConnectionError} When the network request fails.
+ */
+async function fetchWithConnectionErrorsAsync(request: RequestInfo | URL): Promise<Response> {
+	try {
+		return await fetch(request);
+	} catch (error) {
+		if (isAbortError(error) || isTimeoutError(error)) {
+			throw error;
+		}
+
+		throw new ConnectionError("Network request failed", { cause: error });
+	}
 }
 
 /**

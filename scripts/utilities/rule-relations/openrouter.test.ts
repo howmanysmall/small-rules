@@ -1,6 +1,6 @@
 import { describe, it, vi } from "vitest";
-import { HTTPClient, OpenRouter } from "@openrouter/sdk";
-import { TooManyRequestsResponseError } from "@openrouter/sdk/models/errors";
+import { OpenRouter } from "@openrouter/sdk";
+import { RequestAbortedError, TooManyRequestsResponseError } from "@openrouter/sdk/models/errors";
 
 import {
 	createOpenRouterClientOptions,
@@ -49,17 +49,28 @@ function createScriptedResponse(status: number): Response {
 	);
 }
 
-function createScriptedClient(statuses: ReadonlyArray<number>, seen: Array<number>): OpenRouter {
-	async function fetchScriptedAsync(): Promise<Response> {
-		const status = statuses[Math.min(seen.length, statuses.length - 1)] ?? 200;
-		seen.push(status);
-		return createScriptedResponse(status);
-	}
+type ScriptedStep = Error | number;
 
-	return new OpenRouter({
-		...createOpenRouterClientOptions("test-key"),
-		httpClient: new HTTPClient({ fetcher: fetchScriptedAsync }),
-	});
+function createScriptedFetch(steps: ReadonlyArray<ScriptedStep>, seen: Array<ScriptedStep>): () => Promise<Response> {
+	return async function fetchScriptedAsync(): Promise<Response> {
+		const step = steps[Math.min(seen.length, steps.length - 1)] ?? 200;
+		seen.push(step);
+
+		if (step instanceof Error) {
+			throw step;
+		}
+
+		return createScriptedResponse(step);
+	};
+}
+
+function createScriptedClient(steps: ReadonlyArray<ScriptedStep>, seen: Array<ScriptedStep>): OpenRouter {
+	vi.stubGlobal("fetch", createScriptedFetch(steps, seen));
+	return new OpenRouter(createOpenRouterClientOptions("test-key"));
+}
+
+function createTlsHandshakeError(): TypeError {
+	return Object.assign(new TypeError("EPROTO: The TLS handshake failed."), { code: "EPROTO" });
 }
 
 async function createDecisionAsync(client: OpenRouter): Promise<DecisionsResponse> {
@@ -76,8 +87,9 @@ describe("openRouter retry options", () => {
 		vi.useFakeTimers();
 		onTestFinished(() => {
 			vi.useRealTimers();
+			vi.unstubAllGlobals();
 		});
-		const seen = new Array<number>();
+		const seen = new Array<ScriptedStep>();
 		const pending = createDecisionAsync(createScriptedClient([429, 503, 429, 200], seen));
 		await vi.runAllTimersAsync();
 
@@ -91,9 +103,10 @@ describe("openRouter retry options", () => {
 		vi.useFakeTimers();
 		onTestFinished(() => {
 			vi.useRealTimers();
+			vi.unstubAllGlobals();
 		});
 		const startedAt = Date.now();
-		const seen = new Array<number>();
+		const seen = new Array<ScriptedStep>();
 		const pending = createDecisionAsync(createScriptedClient([429], seen));
 		const rejection = expect(pending).rejects.toBeInstanceOf(TooManyRequestsResponseError);
 		await vi.runAllTimersAsync();
@@ -109,8 +122,9 @@ describe("openRouter retry options", () => {
 		vi.useFakeTimers();
 		onTestFinished(() => {
 			vi.useRealTimers();
+			vi.unstubAllGlobals();
 		});
-		const seen = new Array<number>();
+		const seen = new Array<ScriptedStep>();
 		const pending = createDecisionAsync(createScriptedClient([400, 200], seen));
 		const rejection = expect(pending).rejects.toThrow("HTTP 400");
 		await vi.runAllTimersAsync();
@@ -118,6 +132,65 @@ describe("openRouter retry options", () => {
 		await rejection;
 
 		expect(seen).toStrictEqual([400]);
+	});
+
+	it("retries a failed TLS handshake until a request succeeds", async ({ expect, onTestFinished }) => {
+		expect.assertions(2);
+
+		vi.useFakeTimers();
+		onTestFinished(() => {
+			vi.useRealTimers();
+			vi.unstubAllGlobals();
+		});
+		const seen = new Array<ScriptedStep>();
+		const steps = [createTlsHandshakeError(), createTlsHandshakeError(), 200];
+		const pending = createDecisionAsync(createScriptedClient(steps, seen));
+		await vi.runAllTimersAsync();
+
+		await expect(pending).resolves.toMatchObject({ model: "test-model" });
+		expect(seen).toStrictEqual(steps);
+	});
+
+	it("keeps retrying a network failure for minutes, then shows its cause", async ({ expect, onTestFinished }) => {
+		expect.assertions(4);
+
+		vi.useFakeTimers();
+		onTestFinished(() => {
+			vi.useRealTimers();
+			vi.unstubAllGlobals();
+		});
+		const startedAt = Date.now();
+		const failure = createTlsHandshakeError();
+		const seen = new Array<ScriptedStep>();
+		const pending = createDecisionAsync(createScriptedClient([failure], seen));
+		const causeRejection = expect(pending).rejects.toHaveProperty("cause.cause", failure);
+		const messageRejection = expect(pending).rejects.toThrow("EPROTO: The TLS handshake failed.");
+		await vi.runAllTimersAsync();
+
+		await causeRejection;
+		await messageRejection;
+
+		expect(seen.length).toBeGreaterThan(2);
+		expect(Date.now() - startedAt).toBeGreaterThanOrEqual(3 * 60_000);
+	});
+
+	it("does not retry an aborted request", async ({ expect, onTestFinished }) => {
+		expect.assertions(2);
+
+		vi.useFakeTimers();
+		onTestFinished(() => {
+			vi.useRealTimers();
+			vi.unstubAllGlobals();
+		});
+		const seen = new Array<ScriptedStep>();
+		const abort = new DOMException("The operation was aborted.", "AbortError");
+		const pending = createDecisionAsync(createScriptedClient([abort, 200], seen));
+		const rejection = expect(pending).rejects.toBeInstanceOf(RequestAbortedError);
+		await vi.runAllTimersAsync();
+
+		await rejection;
+
+		expect(seen).toStrictEqual([abort]);
 	});
 });
 
