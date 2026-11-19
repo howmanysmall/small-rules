@@ -1,6 +1,7 @@
 import { isReadonlyArrayOfUnknowns } from "@small-rules/arktype-utilities";
 import { compareWithLocale } from "@small-rules/string-utilities/compare-with-locale";
 import { type } from "arktype";
+import { Effect } from "effect";
 
 import { createCacheKey } from "./cache";
 import { createPairJudgmentQuestions, interpretJudgmentAnswers } from "./questions";
@@ -40,6 +41,7 @@ interface RegenerateOptions {
 	readonly allNames: ReadonlyArray<string>;
 	readonly batchSize: number;
 	readonly cards: ReadonlyMap<RuleName, RuleCard>;
+	readonly concurrency: number;
 	readonly decisionModel: string;
 	readonly existingEdges: ReadonlyArray<GeneratedEdge>;
 	readonly judgmentCache: JudgmentCache | undefined;
@@ -94,6 +96,30 @@ function chunkValues<TValue>(values: ReadonlyArray<TValue>, size: number): Reado
 	return chunks;
 }
 
+/**
+ * Runs at most `concurrency` calls at once. Each call is uninterruptible, so
+ * after one rejects, the calls already in flight finish (and cache what they
+ * paid for) before the run rejects with that first error. No new call starts.
+ *
+ * @template TValue - The input type.
+ * @template TResult - The result type.
+ * @param values - The inputs, one call each.
+ * @param concurrency - The most calls in flight at once.
+ * @param mapAsync - The call to make for each input.
+ * @returns The results in input order.
+ */
+async function mapWithConcurrencyAsync<TValue, TResult>(
+	values: ReadonlyArray<TValue>,
+	concurrency: number,
+	mapAsync: (value: TValue) => Promise<TResult>,
+): Promise<ReadonlyArray<TResult>> {
+	return Effect.runPromise(
+		Effect.forEach(values, (value) => Effect.uninterruptible(Effect.promise(async () => mapAsync(value))), {
+			concurrency,
+		}),
+	);
+}
+
 interface JudgmentCacheKeyOptions {
 	readonly candidate: RuleCard;
 	readonly decisionModel: string;
@@ -142,6 +168,7 @@ interface JudgeOptions {
 	readonly batchSize: number;
 	readonly cache: JudgmentCache | undefined;
 	readonly cards: ReadonlyMap<RuleName, RuleCard>;
+	readonly concurrency: number;
 	readonly decisionModel: string;
 	readonly onProgress?: OnProgress | undefined;
 	readonly pairs: ReadonlyArray<UnorderedRulePair>;
@@ -194,8 +221,14 @@ export async function judgeRulePairsAsync(options: JudgeOptions): Promise<Readon
 	const total = seenPairs.size;
 	options.onProgress?.({ cached: cachedCount, completed, phase: "judgments", total });
 
-	const requests = [...pendingBySource].flatMap(([sourceName, candidates]) =>
-		chunkValues(candidates, options.batchSize).map(async (candidatesChunk) => {
+	const batches = [...pendingBySource].flatMap(([sourceName, candidates]) =>
+		chunkValues(candidates, options.batchSize).map((candidatesChunk) => ({ candidatesChunk, sourceName })),
+	);
+
+	await mapWithConcurrencyAsync(
+		batches,
+		options.concurrency,
+		async ({ candidatesChunk, sourceName }): Promise<void> => {
 			const source = getRuleCard(options.cards, sourceName);
 			const answers = await options.transport.decide({
 				model: options.decisionModel,
@@ -220,10 +253,8 @@ export async function judgeRulePairsAsync(options: JudgeOptions): Promise<Readon
 
 			completed += interpreted.size;
 			options.onProgress?.({ cached: cachedCount, completed, phase: "judgments", total });
-		}),
+		},
 	);
-
-	await Promise.all(requests);
 
 	return judgments;
 }
@@ -360,6 +391,7 @@ export async function regenerateRelationsAsync(options: RegenerateOptions): Prom
 		batchSize: options.batchSize,
 		cache: options.judgmentCache,
 		cards: options.cards,
+		concurrency: options.concurrency,
 		decisionModel: options.decisionModel,
 		onProgress: options.onProgress,
 		pairs: options.pairs,
@@ -414,8 +446,10 @@ export async function regenerateRelationsAsync(options: RegenerateOptions): Prom
 	const totalReasons = freshRelations.length;
 	options.onProgress?.({ cached: cachedReasons, completed: completedReasons, phase: "reasons", total: totalReasons });
 
-	const outcomes = await Promise.all(
-		freshRelations.map(async (fresh) => {
+	const outcomes = await mapWithConcurrencyAsync(
+		freshRelations,
+		options.concurrency,
+		async (fresh): Promise<ReasonOutcome> => {
 			const outcome = await createReasonOutcomeAsync(fresh, options);
 			completedReasons += 1;
 
@@ -430,7 +464,7 @@ export async function regenerateRelationsAsync(options: RegenerateOptions): Prom
 				total: totalReasons,
 			});
 			return outcome;
-		}),
+		},
 	);
 
 	for (const outcome of outcomes) {

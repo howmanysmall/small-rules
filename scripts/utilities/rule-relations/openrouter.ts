@@ -1,9 +1,12 @@
 import { isString } from "@small-rules/arktype-utilities";
 import { type } from "arktype";
 
+import { requestRetryBackoff, requestRetryCodes } from "./constants";
 import { createReasonMessages } from "./reasons";
 import { isNoulAnswer, isScoreAnswer } from "./types";
 
+import type { SDKOptions } from "@openrouter/sdk";
+import type { RequestOptions } from "@openrouter/sdk/lib/sdks";
 import type { DecisionsRequest } from "@openrouter/sdk/models";
 import type {
 	CreateApiAlphaDecisionsRequest,
@@ -79,6 +82,23 @@ function toDecisionQuestion(question: DecisionQuestion): DecisionsRequest["quest
 
 function toDecisionQuestions(questions: Readonly<Record<string, DecisionQuestion>>): DecisionsRequest["questions"] {
 	return Object.fromEntries(Object.entries(questions).map(([key, question]) => [key, toDecisionQuestion(question)]));
+}
+
+export function createOpenRouterClientOptions(apiKey: string): SDKOptions {
+	return {
+		apiKey,
+		retryConfig: { backoff: { ...requestRetryBackoff }, retryConnectionErrors: true, strategy: "backoff" },
+	};
+}
+
+/**
+ * Builds the per-call options that make the SDK retry rate limits (429) and
+ * server errors (5xx); its default retries only 5xx.
+ *
+ * @returns The options to pass as the second argument of an SDK call.
+ */
+export function createOpenRouterRequestOptions(): RequestOptions {
+	return { retryCodes: [...requestRetryCodes] };
 }
 
 export function createOpenRouterDecisionTransport(

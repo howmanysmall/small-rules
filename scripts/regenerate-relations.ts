@@ -20,10 +20,13 @@ import {
 	judgmentThresholds,
 	maxRelationsPerRule,
 	reasonPromptVersion,
+	requestConcurrency,
 } from "$script-utilities/rule-relations/constants";
 import {
+	createOpenRouterClientOptions,
 	createOpenRouterDecisionTransport,
 	createOpenRouterReasonWriter,
+	createOpenRouterRequestOptions,
 } from "$script-utilities/rule-relations/openrouter";
 import { renderRelationDocument } from "$script-utilities/rule-relations/render";
 import { repositoryRoot } from "$script-utilities/rule-relations/repository";
@@ -46,7 +49,14 @@ const command = createBaseCommand(name, "1.0.0", 'Regenerates the documentation 
 	.option("--reason-model <reasonModel:string>", "The OpenRouter model used to write relation reasons.", {
 		default: defaultReasonModel,
 	})
-	.action(async ({ openrouterApiKey, reasonModel }): Promise<void> => {
+	.option("--concurrency <concurrency:integer>", "The most OpenRouter requests in flight at once.", {
+		default: requestConcurrency,
+	})
+	.action(async ({ concurrency, openrouterApiKey, reasonModel }): Promise<void> => {
+		if (concurrency < 1) {
+			throw new RangeError(`--concurrency must be at least 1, got ${concurrency}.`);
+		}
+
 		const startedAt = performance.now();
 		const usageTracker = createRelationUsageTracker();
 		const progress: Partial<Record<RelationProgress["phase"], RelationProgress>> = {};
@@ -68,7 +78,8 @@ const command = createBaseCommand(name, "1.0.0", 'Regenerates the documentation 
 			);
 		}
 
-		const openrouter = new OpenRouter({ apiKey: openrouterApiKey });
+		const openrouter = new OpenRouter(createOpenRouterClientOptions(openrouterApiKey));
+		const requestOptions = createOpenRouterRequestOptions();
 		const cards = buildRuleCards();
 		const ruleNames = [...cards.keys()].toSorted(compareStrings);
 		const pairs = createAllRulePairs(ruleNames);
@@ -80,6 +91,7 @@ const command = createBaseCommand(name, "1.0.0", 'Regenerates the documentation 
 				allNames: ruleNames,
 				batchSize: judgmentBatchSize,
 				cards,
+				concurrency,
 				decisionModel,
 				existingEdges,
 				judgmentCache: createJudgmentCache(nodePath.join(cacheRoot, "judgments")),
@@ -93,7 +105,7 @@ const command = createBaseCommand(name, "1.0.0", 'Regenerates the documentation 
 				reasonWriter: createOpenRouterReasonWriter(
 					reasonModel,
 					async (request) => {
-						const response = await openrouter.chat.send(request);
+						const response = await openrouter.chat.send(request, requestOptions);
 						if (!("choices" in response)) {
 							throw new TypeError("OpenRouter unexpectedly returned a stream.");
 						}
@@ -104,7 +116,7 @@ const command = createBaseCommand(name, "1.0.0", 'Regenerates the documentation 
 				),
 				thresholds: judgmentThresholds,
 				transport: createOpenRouterDecisionTransport(async (request) => {
-					return openrouter.alpha.decisions.create(request);
+					return openrouter.alpha.decisions.create(request, requestOptions);
 				}, usageTracker.record),
 			});
 

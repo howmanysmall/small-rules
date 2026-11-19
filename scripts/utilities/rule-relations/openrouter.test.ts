@@ -1,9 +1,15 @@
-import { describe, it } from "vitest";
+import { describe, it, vi } from "vitest";
+import { HTTPClient, OpenRouter } from "@openrouter/sdk";
+import { TooManyRequestsResponseError } from "@openrouter/sdk/models/errors";
 
 import {
+	createOpenRouterClientOptions,
 	createOpenRouterDecisionTransport,
 	createOpenRouterReasonWriter,
+	createOpenRouterRequestOptions,
 } from "$script-utilities/rule-relations/openrouter";
+
+import type { DecisionsResponse } from "@openrouter/sdk/models";
 
 import type { RuleName } from "$documentation/data/rule-manifest";
 import type { RelationUsage, RuleCard } from "$script-utilities/rule-relations/types";
@@ -31,6 +37,89 @@ const noWarnCard: RuleCard = {
 	sharedUtilities: [],
 	title: "No Warn",
 };
+
+const decisionsBody = { answers: {}, model: "test-model", usage: { input_tokens: 1, output_tokens: 1 } };
+
+function createScriptedResponse(status: number): Response {
+	if (status === 200) return Response.json(decisionsBody, { status });
+
+	return Response.json(
+		{ error: { code: status, message: `HTTP ${status}` } },
+		{ headers: { "retry-after": "2" }, status },
+	);
+}
+
+function createScriptedClient(statuses: ReadonlyArray<number>, seen: Array<number>): OpenRouter {
+	async function fetchScriptedAsync(): Promise<Response> {
+		const status = statuses[Math.min(seen.length, statuses.length - 1)] ?? 200;
+		seen.push(status);
+		return createScriptedResponse(status);
+	}
+
+	return new OpenRouter({
+		...createOpenRouterClientOptions("test-key"),
+		httpClient: new HTTPClient({ fetcher: fetchScriptedAsync }),
+	});
+}
+
+async function createDecisionAsync(client: OpenRouter): Promise<DecisionsResponse> {
+	return client.alpha.decisions.create(
+		{ decisionsRequest: { model: "test-model", questions: {}, state: {} } },
+		createOpenRouterRequestOptions(),
+	);
+}
+
+describe("openRouter retry options", () => {
+	it("retries rate limits and server errors until a request succeeds", async ({ expect, onTestFinished }) => {
+		expect.assertions(2);
+
+		vi.useFakeTimers();
+		onTestFinished(() => {
+			vi.useRealTimers();
+		});
+		const seen = new Array<number>();
+		const pending = createDecisionAsync(createScriptedClient([429, 503, 429, 200], seen));
+		await vi.runAllTimersAsync();
+
+		await expect(pending).resolves.toMatchObject({ model: "test-model" });
+		expect(seen).toStrictEqual([429, 503, 429, 200]);
+	});
+
+	it("keeps retrying a rate limit for minutes, then rejects with it", async ({ expect, onTestFinished }) => {
+		expect.assertions(2);
+
+		vi.useFakeTimers();
+		onTestFinished(() => {
+			vi.useRealTimers();
+		});
+		const startedAt = Date.now();
+		const seen = new Array<number>();
+		const pending = createDecisionAsync(createScriptedClient([429], seen));
+		const rejection = expect(pending).rejects.toBeInstanceOf(TooManyRequestsResponseError);
+		await vi.runAllTimersAsync();
+
+		await rejection;
+
+		expect(Date.now() - startedAt).toBeGreaterThanOrEqual(3 * 60_000);
+	});
+
+	it("does not retry a client error", async ({ expect, onTestFinished }) => {
+		expect.assertions(2);
+
+		vi.useFakeTimers();
+		onTestFinished(() => {
+			vi.useRealTimers();
+		});
+		const seen = new Array<number>();
+		const pending = createDecisionAsync(createScriptedClient([400, 200], seen));
+		const rejection = expect(pending).rejects.toThrow("HTTP 400");
+		await vi.runAllTimersAsync();
+
+		await rejection;
+
+		expect(seen).toStrictEqual([400]);
+	});
+});
 
 describe("openRouter relation adapters", () => {
 	it.for([

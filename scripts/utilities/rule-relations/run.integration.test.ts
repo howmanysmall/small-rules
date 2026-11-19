@@ -1,10 +1,15 @@
 import { mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import nodePath from "node:path";
+import { setTimeout as delay } from "node:timers/promises";
 import { describe, it } from "vitest";
 
 import { createJudgmentCache } from "$script-utilities/rule-relations/cache";
-import { judgmentPromptVersion, judgmentThresholds } from "$script-utilities/rule-relations/constants";
+import {
+	judgmentPromptVersion,
+	judgmentThresholds,
+	requestConcurrency,
+} from "$script-utilities/rule-relations/constants";
 import { compareRelationBaseline } from "$script-utilities/rule-relations/evaluation";
 import {
 	createAllRulePairs,
@@ -19,11 +24,13 @@ import { createJudgments } from "./fixtures";
 import type { RuleName } from "$documentation/data/rule-manifest";
 import type {
 	DecisionAnswer,
+	DecisionQuestion,
 	DecisionTransport,
 	PairJudgments,
 	ReasonWriter,
 	RelationProgress,
 	RuleCard,
+	UnorderedRulePair,
 } from "$script-utilities/rule-relations/types";
 
 const cardFixtures: ReadonlyMap<RuleName, RuleCard> = new Map<RuleName, RuleCard>([
@@ -99,6 +106,83 @@ function createFakeReasonWriter(reason: (from: RuleName, to: RuleName) => string
 	return { writeReason: async ({ relation }) => reason(relation.from, relation.to) };
 }
 
+interface ConcurrencyProbe {
+	readonly getPeak: () => number;
+	readonly trackAsync: <TValue>(workAsync: () => Promise<TValue>) => Promise<TValue>;
+}
+
+function createConcurrencyProbe(): ConcurrencyProbe {
+	let inFlight = 0;
+	let peak = 0;
+
+	return {
+		getPeak: () => peak,
+		trackAsync: async <TValue>(workAsync: () => Promise<TValue>): Promise<TValue> => {
+			inFlight += 1;
+			peak = Math.max(peak, inFlight);
+
+			try {
+				await delay(5);
+				return await workAsync();
+			} finally {
+				inFlight -= 1;
+			}
+		},
+	};
+}
+
+function getOnlyCandidateName(questions: Readonly<Record<string, DecisionQuestion>>): RuleName | undefined {
+	return Object.values(questions)[0]?.instructions.candidate.name;
+}
+
+interface FailingTransportOptions {
+	readonly failingCandidate: RuleName;
+	readonly failure: Error;
+	readonly started: Array<string>;
+	readonly transport: DecisionTransport;
+}
+
+function createFailingTransport(options: FailingTransportOptions): DecisionTransport {
+	return {
+		decide: async (request): Promise<Readonly<Record<string, DecisionAnswer>>> => {
+			const candidateName = getOnlyCandidateName(request.questions);
+			options.started.push(`${request.state.name}/${candidateName}`);
+
+			if (candidateName === options.failingCandidate) {
+				throw options.failure;
+			}
+
+			await delay(20);
+			return options.transport.decide(request);
+		},
+	};
+}
+
+function createFailingReasonWriter(failure: Error, failingFrom: RuleName, failingTo: RuleName): ReasonWriter {
+	return {
+		writeReason: async ({ relation }): Promise<string> => {
+			if (relation.from === failingFrom && relation.to === failingTo) {
+				throw failure;
+			}
+
+			await delay(20);
+			return `Both ${relation.from} and ${relation.to} matter.`;
+		},
+	};
+}
+
+const everyPairRelated = new Map([
+	[getPairKey("no-error", "no-print"), createJudgments()],
+	[getPairKey("no-error", "no-warn"), createJudgments()],
+	[getPairKey("no-print", "no-warn"), createJudgments()],
+]);
+
+const everyPair = [
+	{ left: "no-error", right: "no-print" },
+	{ left: "no-error", right: "no-warn" },
+	{ left: "no-print", right: "no-warn" },
+] satisfies ReadonlyArray<UnorderedRulePair>;
+
 describe("judgeRulePairs", () => {
 	it("judges each unordered pair once and can repeat offline from cache", async ({ expect, onTestFinished }) => {
 		expect.assertions(5);
@@ -116,6 +200,7 @@ describe("judgeRulePairs", () => {
 			batchSize: 10,
 			cache,
 			cards: cardFixtures,
+			concurrency: requestConcurrency,
 			decisionModel: "test-model",
 			onProgress: (update) => {
 				progress.push(update);
@@ -144,6 +229,59 @@ describe("judgeRulePairs", () => {
 		expect(progress).toContainEqual({ cached: 0, completed: 1, phase: "judgments", total: 1 });
 		expect(progress.at(-1)).toStrictEqual({ cached: 1, completed: 1, phase: "judgments", total: 1 });
 	});
+
+	it("keeps no more judgment requests in flight than the limit", async ({ expect }) => {
+		expect.assertions(2);
+
+		const probe = createConcurrencyProbe();
+		const transport = createFakeTransport(everyPairRelated, new Array<string>());
+		const judgments = await judgeRulePairsAsync({
+			batchSize: 1,
+			cache: undefined,
+			cards: cardFixtures,
+			concurrency: 2,
+			decisionModel: "test-model",
+			pairs: everyPair,
+			promptVersion: judgmentPromptVersion,
+			transport: { decide: async (options) => probe.trackAsync(async () => transport.decide(options)) },
+		});
+
+		expect(judgments.size).toBe(3);
+		expect(probe.getPeak()).toBe(2);
+	});
+
+	it("caches finished batches and rethrows the original error", async ({ expect }) => {
+		expect.assertions(3);
+
+		const failure = new Error("HTTP 429: rate limited");
+		const started = new Array<string>();
+		const saved = new Array<PairJudgments>();
+		const transport = createFakeTransport(everyPairRelated, new Array<string>());
+		const run = judgeRulePairsAsync({
+			batchSize: 1,
+			cache: {
+				get: () => undefined,
+				set: (_key, value) => {
+					saved.push(value);
+				},
+			},
+			cards: cardFixtures,
+			concurrency: 2,
+			decisionModel: "test-model",
+			pairs: everyPair,
+			promptVersion: judgmentPromptVersion,
+			transport: createFailingTransport({
+				failingCandidate: "no-warn",
+				failure,
+				started,
+				transport,
+			}),
+		});
+
+		await expect(run).rejects.toBe(failure);
+		expect(saved).toStrictEqual([createJudgments()]);
+		expect(started).toStrictEqual(["no-error/no-print", "no-error/no-warn"]);
+	});
 });
 
 describe("regenerateRelations", () => {
@@ -166,6 +304,7 @@ describe("regenerateRelations", () => {
 			allNames: ["no-error", "no-print", "no-warn"],
 			batchSize: 10,
 			cards: cardFixtures,
+			concurrency: requestConcurrency,
 			decisionModel: "test-model",
 			existingEdges: [],
 			judgmentCache: undefined,
@@ -214,6 +353,7 @@ describe("regenerateRelations", () => {
 			allNames: ["no-error", "no-print", "no-warn"],
 			batchSize: 10,
 			cards: cardFixtures,
+			concurrency: requestConcurrency,
 			decisionModel: "test-model",
 			existingEdges: [
 				{ from: "no-print", kind: "related", reason: "Retained.", to: "no-warn" },
@@ -250,6 +390,7 @@ describe("regenerateRelations", () => {
 			allNames: ["no-error", "no-print", "no-warn"],
 			batchSize: 10,
 			cards: cardFixtures,
+			concurrency: requestConcurrency,
 			decisionModel: "test-model",
 			existingEdges: [],
 			judgmentCache: undefined,
@@ -267,6 +408,7 @@ describe("regenerateRelations", () => {
 			allNames: ["no-error", "no-print", "no-warn"],
 			batchSize: 10,
 			cards: cardFixtures,
+			concurrency: requestConcurrency,
 			decisionModel: "test-model",
 			existingEdges: [],
 			judgmentCache: undefined,
@@ -285,6 +427,69 @@ describe("regenerateRelations", () => {
 		expect(nearThreshold.reviews[0]).toMatchObject({ left: "no-print", right: "no-warn", strength: 0.6 });
 		expect(rejected.edges).toHaveLength(0);
 		expect(rejected.reviews[0]?.concern).toContain("reason");
+	});
+
+	it("keeps no more reason requests in flight than the limit", async ({ expect }) => {
+		expect.assertions(2);
+
+		const probe = createConcurrencyProbe();
+		const result = await regenerateRelationsAsync({
+			allNames: ["no-error", "no-print", "no-warn"],
+			batchSize: 10,
+			cards: cardFixtures,
+			concurrency: 2,
+			decisionModel: "test-model",
+			existingEdges: [],
+			judgmentCache: undefined,
+			judgmentPromptVersion,
+			maxRelationsPerRule: 8,
+			pairs: everyPair,
+			reasonCache: undefined,
+			reasonModel: "test-reason-model",
+			reasonPromptVersion: 1,
+			reasonWriter: {
+				writeReason: async ({ relation }) =>
+					probe.trackAsync(async () => `Both ${relation.from} and ${relation.to} matter.`),
+			},
+			thresholds: judgmentThresholds,
+			transport: createFakeTransport(everyPairRelated, new Array<string>()),
+		});
+
+		expect(result.edges).toHaveLength(3);
+		expect(probe.getPeak()).toBe(2);
+	});
+
+	it("caches finished reasons and rethrows the original error", async ({ expect }) => {
+		expect.assertions(2);
+
+		const failure = new Error("HTTP 503: provider overloaded");
+		const saved = new Array<string>();
+		const run = regenerateRelationsAsync({
+			allNames: ["no-error", "no-print", "no-warn"],
+			batchSize: 10,
+			cards: cardFixtures,
+			concurrency: 2,
+			decisionModel: "test-model",
+			existingEdges: [],
+			judgmentCache: undefined,
+			judgmentPromptVersion,
+			maxRelationsPerRule: 8,
+			pairs: everyPair,
+			reasonCache: {
+				get: () => undefined,
+				set: (_key, value) => {
+					saved.push(value);
+				},
+			},
+			reasonModel: "test-reason-model",
+			reasonPromptVersion: 1,
+			reasonWriter: createFailingReasonWriter(failure, "no-error", "no-warn"),
+			thresholds: judgmentThresholds,
+			transport: createFakeTransport(everyPairRelated, new Array<string>()),
+		});
+
+		await expect(run).rejects.toBe(failure);
+		expect(saved).toContain("Both no-error and no-print matter.");
 	});
 });
 
