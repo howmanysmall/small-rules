@@ -521,7 +521,7 @@ function createScriptedReasonWriter(reasons: ReadonlyArray<string>): ScriptedRea
 
 async function regenerateOnePairAsync(
 	reasonWriter: ReasonWriter,
-	reasonCache: ReasonCache | undefined,
+	reasonCache?: ReasonCache,
 ): Promise<RegenerationResult> {
 	return regenerateRelationsAsync({
 		allNames: ["no-error", "no-print", "no-warn"],

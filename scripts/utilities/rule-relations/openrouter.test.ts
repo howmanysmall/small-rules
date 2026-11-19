@@ -323,6 +323,7 @@ describe("openRouter relation adapters", () => {
 			prompt = request.chatRequest.messages.map((message) => message.content).join("\n");
 			return { choices: [{ message: { content: "Shorter." } }] };
 		});
+
 		await writer.writeReason({
 			left: noPrintCard,
 			previous: { problems: ["Reason is empty."], reason: "" },

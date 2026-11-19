@@ -22,6 +22,7 @@ function createRetryInstructions(previous: ReasonAttempt): string {
 		"Problems:",
 		...previous.problems.map((problem) => `- ${problem}`),
 	];
+
 	if (previous.reason.length > maxReasonLength) {
 		lines.push(
 			`It was ${previous.reason.length} characters; the limit is ${maxReasonLength}, so the new sentence must be shorter.`,
@@ -51,7 +52,9 @@ export function createReasonMessages({ left, previous, relation, right }: Create
 		"Do not use newlines.",
 	].join("\n");
 
-	if (previous === undefined) return [{ content, role: "user" }];
+	if (previous === undefined) {
+		return [{ content, role: "user" }];
+	}
 	return [{ content: `${content}\n${createRetryInstructions(previous)}`, role: "user" }];
 }
 
