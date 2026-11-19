@@ -221,7 +221,7 @@ describe("curly", () => {
 					{ messageId: "loopBody" },
 					{ messageId: "loopBody" },
 				],
-				documentation: { id: "fail-loops", title: "Unbraced loop bodies" },
+				documentation: { id: "fail-loops", preserveFormatting: true, title: "Unbraced loop bodies" },
 			},
 			{
 				code: ["function branches(a) {", "\tif (a) return 1;", "\telse return 2;", "}"].join("\n"),

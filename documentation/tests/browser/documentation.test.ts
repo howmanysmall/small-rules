@@ -111,6 +111,15 @@ playwrightIt("renders the custom rule documentation sections", async ({ page }) 
 	await playwrightExpect(page.getByRole("button", { name: "Copy example" })).toHaveCount(2);
 });
 
+playwrightIt("renders multi-line rule examples across multiple lines", async ({ page }) => {
+	await page.goto(`${baseUrl}rules/general/prefer-class-properties/`);
+
+	const examples = page.locator("[data-rule-example]");
+	await playwrightExpect(examples).toHaveCount(2);
+	await playwrightExpect(examples.first().locator(".ec-line")).toHaveCount(5);
+	await playwrightExpect(examples.nth(1).locator(".ec-line")).toHaveCount(3);
+});
+
 playwrightIt("renders backticked description text as inline code", async ({ page }) => {
 	await page.goto(`${baseUrl}${inlineCodeRulePath}`);
 
@@ -346,6 +355,7 @@ playwrightIt("keeps build-only code out of browser assets", async ({ page }) => 
 		"vitest",
 		"documentation-rule-extractor",
 		"src/rules/roblox/no-print",
+		"oxfmt",
 	]) {
 		playwrightExpect(browserCode).not.toContain(forbiddenText);
 	}

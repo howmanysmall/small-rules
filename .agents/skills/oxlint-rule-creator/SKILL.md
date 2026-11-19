@@ -419,12 +419,11 @@ failing case. If a useful example is genuinely impractical, add a specific
 `exampleExemption` to the manifest entry instead of inventing a misleading
 example.
 
-Documented `code` is rendered verbatim on the docs site. Multi-statement
-examples must use real newlines via `.join("\n")` arrays — never a single-line
-string with multiple statements (the page will show one collapsed line).
-Short single-statement bodies like `if (flag) doThing();` are fine as one line.
-`documentation/tests/unit/rule-examples.test.ts` fails the build if a documented
-example is a multi-statement one-liner.
+Documented `code` (and `output`) are automatically formatted with `oxfmt` by the
+documentation pipeline before rendering (`preserveFormatting: true` opts out
+when specific whitespace or line breaks are essential to the example), and
+`documentation/tests/unit/rule-examples.test.ts` verifies both multi-line
+formatting and Oxlint semantic preservation.
 
 ### 2. Add the Rule to the Documentation Manifest
 

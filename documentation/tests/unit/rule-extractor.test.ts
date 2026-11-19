@@ -161,4 +161,78 @@ describe("extractRuleExamples", () => {
 			"tests/fixtures/documentation-rule-extractor/skip.fixture.ts:11:4: documented cases cannot use skip.",
 		);
 	});
+
+	it("extracts preserveFormatting when set to true", ({ expect }) => {
+		expect.assertions(1);
+
+		const sourceText = [
+			'import { ts } from "@small-rules/rule-harness/rule-testers";',
+			'ts.run("preserve-example", rule, {',
+			"\tinvalid: [",
+			"\t\t{",
+			'\t\t\tcode: "for (const item of items)\\n\\tvisit(item);",',
+			"\t\t\terrors: [{ messageId: 'loopBody' }],",
+			'\t\t\tdocumentation: { id: "fail", preserveFormatting: true, title: "Preserved" },',
+			"\t\t},",
+			"\t],",
+			'\tvalid: [{ code: "ok();", documentation: { id: "pass", preserveFormatting: false, title: "Default" } }],',
+			"});",
+		].join("\n");
+
+		expect(extractRuleExamples(sourceText, "src/rules/general/preserve-example.test.ts")).toStrictEqual([
+			{
+				examples: [
+					{
+						id: "fail",
+						code: "for (const item of items)\n\tvisit(item);",
+						errors: [{ messageId: "loopBody" }],
+						kind: "invalid",
+						language: "ts",
+						preserveFormatting: true,
+						title: "Preserved",
+					},
+					{
+						id: "pass",
+						code: "ok();",
+						kind: "valid",
+						language: "ts",
+						title: "Default",
+					},
+				],
+				ruleName: "preserve-example",
+			},
+		]);
+	});
+
+	it("rejects non-boolean preserveFormatting in documentation metadata", ({ expect }) => {
+		expect.assertions(1);
+
+		const sourceText = [
+			'import { ts } from "@small-rules/rule-harness/rule-testers";',
+			'ts.run("preserve-example", rule, {',
+			"\tinvalid: [],",
+			'\tvalid: [{ code: "ok();", documentation: { id: "pass", preserveFormatting: "yes", title: "Bad" } }],',
+			"});",
+		].join("\n");
+
+		expect(() => extractRuleExamples(sourceText, "src/rules/general/preserve-example.test.ts")).toThrow(
+			"src/rules/general/preserve-example.test.ts:4:76: documentation.preserveFormatting must evaluate to a boolean.",
+		);
+	});
+
+	it("rejects unsupported documentation metadata fields", ({ expect }) => {
+		expect.assertions(1);
+
+		const sourceText = [
+			'import { ts } from "@small-rules/rule-harness/rule-testers";',
+			'ts.run("preserve-example", rule, {',
+			"\tinvalid: [],",
+			'\tvalid: [{ code: "ok();", documentation: { id: "pass", title: "Bad", extra: true } }],',
+			"});",
+		].join("\n");
+
+		expect(() => extractRuleExamples(sourceText, "src/rules/general/preserve-example.test.ts")).toThrow(
+			"src/rules/general/preserve-example.test.ts:4:70: documentation only supports id, preserveFormatting, and title.",
+		);
+	});
 });

@@ -186,6 +186,22 @@ interactive = true
 confirm = "This will run bumpp, create a release commit/tag, and push. Continue?"
 run = "node --run release"
 
+[tasks.release-notes]
+description = "Generate and publish GitHub release notes for a tag using communique."
+usage = """
+arg <tag> {
+	help "Git tag to generate release notes for (e.g. v3.13.0)"
+}
+flag "--max-tokens <max_tokens>" default="131072" {
+	help "Maximum output tokens for the LLM response"
+}
+complete "tag" run="git tag --sort=-creatordate 2>/dev/null"
+"""
+run = """
+GITHUB_TOKEN="$(gh auth token)" OPENAI_API_KEY="${OPENAI_API_KEY:-$OPENROUTER_API_KEY}" \
+	communique generate --config communique.toml --github-release "${usage_tag?}" --max-tokens "${usage_max_tokens:-131072}"
+"""
+
 [tasks.release-status]
 description = "Show recent Publish Package workflow runs in GitHub Actions."
 run = "gh run list --workflow release.yaml --limit 5"
