@@ -14,7 +14,7 @@ import {
 	isVariableDeclarator,
 } from "@small-rules/oxlint-utilities";
 
-import { getVariableByName } from "$oxc-utilities/ast-utilities";
+import { getReferencedVariable } from "$oxc-utilities/ast-utilities";
 import { createRule } from "$oxc-utilities/create-rule";
 import { createFunctionStackVisitor } from "$oxc-utilities/function-stack-visitor";
 import { getSingleDefinition } from "$oxc-utilities/single-variable-definition";
@@ -86,9 +86,7 @@ const noUseOfEmptyReturnValue = createRule("no-use-of-empty-return-value", "gene
 			CallExpression(node): void {
 				if (!callReturnValueIsUsed(node) || !isBindingIdentifier(node.callee)) return;
 
-				const scope = context.sourceCode.getScope(node);
-				const reference = scope.references.find((entry) => entry.identifier === node.callee);
-				const resolved = reference?.resolved ?? getVariableByName(scope, node.callee.name);
+				const resolved = getReferencedVariable(context.sourceCode, node.callee);
 				if (resolved === undefined) return;
 
 				const functionNode = getFunctionFromVariable(resolved);
