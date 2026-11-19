@@ -186,10 +186,6 @@ interactive = true
 confirm = "This will run bumpp, create a release commit/tag, and push. Continue?"
 run = "node --run release"
 
-[tasks.release-status]
-description = "Show recent Publish Package workflow runs in GitHub Actions."
-run = "gh run list --workflow release.yaml --limit 5"
-
 [tasks.release-notes]
 description = "Generate and publish GitHub release notes for a tag using communique."
 usage = """
@@ -205,6 +201,10 @@ run = """
 GITHUB_TOKEN="$(gh auth token)" OPENAI_API_KEY="${OPENAI_API_KEY:-$OPENROUTER_API_KEY}" \
 	communique generate --config communique.toml --github-release "${usage_tag?}" --max-tokens "${usage_max_tokens:-131072}"
 """
+
+[tasks.release-status]
+description = "Show recent Publish Package workflow runs in GitHub Actions."
+run = "gh run list --workflow release.yaml --limit 5"
 
 [tasks.test]
 description = "Run the Vitest unit test suite once without sharding."
