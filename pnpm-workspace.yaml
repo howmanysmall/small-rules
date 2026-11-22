@@ -1,3 +1,15 @@
+audit:
+  ignore:
+    # picomatch <=4.0.7 extglob ReDoS. No patched release exists yet; every path
+    # is docs/lint/test tooling (astro, vite, vitest, cspell) matching this
+    # repo's own globs, and the published plugin does not depend on it.
+    # Drop this once picomatch ships a fix.
+    - GHSA-fc5q-39xc-vjpf
+    # minimatch@10 globparts amplification. eslint@10 pins minimatch ^10 and
+    # the fix is only in 11.x; eslint runs on this repo's own globs, never on
+    # untrusted patterns.
+    - GHSA-g3hv-75wg-m249
+
 autoInstallPeers: true
 blockExoticSubdeps: true
 catalogMode: prefer
@@ -33,11 +45,22 @@ minimumReleaseAgeExclude:
 
 minimumReleaseAgeExcludePrune: true
 minimumReleaseAgeStrict: true
+
+registries:
+  "@jsr": https://npm.jsr.io
+
 resolutionMode: time-based
 shamefullyHoist: false
 shellEmulator: true
+
+skills:
+  dirs:
+    - .agents/skills
+    - .claude/skills
+
 strictDepBuilds: true
 strictPeerDependencies: false
+
 # CI re-verifies the lockfile; local installs still check newly resolved packages.
 trustLockfile: true
 trustPolicy: no-downgrade
@@ -269,18 +292,6 @@ peerDependencyRules:
     "@emnapi/runtime": ">=1.0.0"
     "@typescript-eslint/*>typescript": ">=6.0.0 <7.0.0"
 
-audit:
-  ignore:
-    # picomatch <=4.0.7 extglob ReDoS. No patched release exists yet; every path
-    # is docs/lint/test tooling (astro, vite, vitest, cspell) matching this
-    # repo's own globs, and the published plugin does not depend on it.
-    # Drop this once picomatch ships a fix.
-    - GHSA-fc5q-39xc-vjpf
-    # minimatch@10 globparts amplification. eslint@10 pins minimatch ^10 and
-    # the fix is only in 11.x; eslint runs on this repo's own globs, never on
-    # untrusted patterns.
-    - GHSA-g3hv-75wg-m249
-
 fetchRetries: 5
 fetchRetryMaxtimeout: 30000
 fetchRetryMintimeout: 1000
@@ -294,14 +305,6 @@ permissions:
 
   tsdown:
     skills: true
-
-registries:
-  "@jsr": https://npm.jsr.io
-
-skills:
-  dirs:
-    - .agents/skills
-    - .claude/skills
 
 strictSsl: true
 strictStorePkgContentCheck: true
