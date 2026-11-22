@@ -1,17 +1,17 @@
 diff --git a/dist/oxlint.mjs b/dist/oxlint.mjs
-index e91ee5c2ef541d026baa7443a3e4e6695fd6577a..4a5922666580a28c2739b762bd717dc43f0e5b19 100644
---- a/dist/oxlint.mjs
+index bc2bf8e137ed84dd5bd10bef3daaeccb418c2ec6..d9b023a7f1d432cd5f5f5485d019ac146b54604d 100644
+--- a/dist/oxlint.mjs	
 +++ b/dist/oxlint.mjs
-@@ -1086,7 +1086,7 @@ function oxlintOxfmt(options) {
- 		specifier: resolveJsPluginSpecifier("eslint-plugin-oxfmt")
- 	};
+@@ -1128,7 +1128,7 @@ function oxlintOxfmt(options) {
+ 	const inlineOverrides = oxfmtOptions["overrides"];
+ 	const ruleOverrides = [...editorConfigOverrides, ...Array.isArray(inlineOverrides) ? inlineOverrides : []];
  	const jsFiles = oxfmtFiles?.flat() ?? [...FORMATTED_FILES.javascript];
 -	const tsFiles = oxfmtFiles?.flat() ?? [...FORMATTED_FILES.typescript, ...componentExtensions.map((extension) => `**/*.${extension}`)];
 +	const tsFiles = oxfmtFiles?.flat() ?? [...FORMATTED_FILES.typescript];
  	function createFragments(name, files) {
  		return [{
  			name,
-@@ -1672,7 +1672,7 @@ function isentinel(factoryOptions, ...userConfigs) {
+@@ -1705,7 +1705,7 @@ function isentinel(factoryOptions, ...userConfigs) {
  	if (Object.keys(rules).length > 0) {
  		const optionsFragments = createOxlintConfigs({
  			name: "isentinel/options-rules",
