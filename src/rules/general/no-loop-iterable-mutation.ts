@@ -124,8 +124,15 @@ function getLiveIterable(right: ESTree.Expression): LiveIterable | undefined {
 		return { name: node.name, method: "direct" };
 	}
 
-	if (!isCallExpression(node) || !isMemberExpression(node.callee) || node.arguments.length > 0) return undefined;
-	if (node.callee.optional || !isIdentifier(node.callee.object)) return undefined;
+	if (
+		!isCallExpression(node) ||
+		!isMemberExpression(node.callee) ||
+		node.arguments.length > 0 ||
+		node.callee.optional ||
+		!isIdentifier(node.callee.object)
+	) {
+		return undefined;
+	}
 
 	const method = getMemberPropertyName(node.callee);
 	if (method === undefined || !ITERATOR_METHODS.has(method)) return undefined;

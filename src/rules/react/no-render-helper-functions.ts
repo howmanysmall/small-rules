@@ -258,9 +258,13 @@ const noRenderHelperFunctions = createRule("no-render-helper-functions", "react"
 					return;
 				}
 
-				if (componentDepth > 0) return;
-				if (isHookName(functionName)) return;
-				if (isCallbackReferenceFunction(node, context.sourceCode)) return;
+				if (
+					componentDepth > 0 ||
+					isHookName(functionName) ||
+					isCallbackReferenceFunction(node, context.sourceCode)
+				) {
+					return;
+				}
 
 				const returnTypeAnnotation = getReturnTypeAnnotation(node);
 				const hasReturnType = isReactNodeTypeAnnotation(returnTypeAnnotation);

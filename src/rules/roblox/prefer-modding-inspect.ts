@@ -36,10 +36,16 @@ function getRecordEnumTypeParameter(node: ESTree.VariableDeclarator): ESTree.TST
 	if (typeArguments?.params.length !== 2) return undefined;
 
 	const [enumType, secondParameter] = typeArguments.params;
-	/* v8 ignore next -- @preserve the length check above guarantees both Record parameters exist. */
-	if (enumType === undefined || secondParameter === undefined) return undefined;
-	if (!isTsLiteralType(secondParameter)) return undefined;
-	if (!isAnyLiteral(secondParameter.literal) || secondParameter.literal.value !== true) return undefined;
+	/* v8 ignore next -- @preserve the length check above guarantees both Record parameters exist. @preserve */
+	if (
+		enumType === undefined ||
+		secondParameter === undefined ||
+		!isTsLiteralType(secondParameter) ||
+		!isAnyLiteral(secondParameter.literal) ||
+		secondParameter.literal.value !== true
+	) {
+		return undefined;
+	}
 
 	return enumType;
 }
@@ -60,8 +66,7 @@ function isTrueObjectExpression(node?: ESTree.Expression | null): boolean {
 	if (!isObjectExpression(node)) return false;
 
 	for (const property of node.properties) {
-		if (!isProperty(property)) return false;
-		if (!isAnyLiteral(property.value) || property.value.value !== true) return false;
+		if (!isProperty(property) || !isAnyLiteral(property.value) || property.value.value !== true) return false;
 	}
 
 	return true;

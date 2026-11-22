@@ -16,7 +16,7 @@ function createIsUseHook(hookName: `use${string}`): (node: ESTree.Node) => boole
 			isIdentifierNamed(node, hookName) ||
 			(isIdentifierNamed(node.object, "React") && isIdentifierNamed(node.property, hookName))
 		);
-		/* v8 ignore stop */
+		/* v8 ignore stop -- closes the ignored range opened above. */
 	};
 }
 
@@ -36,10 +36,15 @@ function getDataArguments(analysis: ReactEffectAnalysis, reference: Reference): 
 		// Ideally would use isState and isRef, not the hooks.
 		// But because it goes to leaves. Must be some other way?
 		const { identifier } = upstreamReference;
-		if (analysis.isUseStateHook(identifier) || analysis.isProp(upstreamReference) || isUseRef(identifier)) continue;
-
 		/* v8 ignore next -- data leaves resolve to plain identifiers; `ref.current` / constant leaf shapes are covered by the isProp/isUseRef guards above. @preserve */
-		if (analysis.isRefCurrent(upstreamReference)) continue;
+		if (
+			analysis.isUseStateHook(identifier) ||
+			analysis.isProp(upstreamReference) ||
+			isUseRef(identifier) ||
+			analysis.isRefCurrent(upstreamReference)
+		) {
+			continue;
+		}
 
 		if (!analysis.isConstant(upstreamReference)) {
 			dataArguments.push(upstreamReference);

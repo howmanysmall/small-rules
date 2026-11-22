@@ -198,11 +198,18 @@ const curly = createRule("curly", "general", {
 
 		function checkBracedLoneIf(node: ESTree.IfStatement, body: ESTree.BlockStatement, headerEnd: number): void {
 			const [only] = body.body;
-			if (only === undefined || body.body.length > 1 || !isOneLineBody(only)) return;
-			if (sourceCode.getCommentsInside(body).length > 0) return;
-			if (getOneLineWidth(node, only, headerEnd) > printWidth) return;
+			if (
+				only === undefined ||
+				body.body.length > 1 ||
+				!isOneLineBody(only) ||
+				sourceCode.getCommentsInside(body).length > 0 ||
+				getOneLineWidth(node, only, headerEnd) > printWidth
+			) {
+				return;
+			}
 			// The `;` keeps a line that opens with `(` or `[` from joining the
 			// statement.
+
 			const semicolon = text[only.range[1] - 1] === ";" ? "" : ";";
 			report(body, "simpleBody", [headerEnd, body.range[1]], ` ${sourceCode.getText(only)}${semicolon}`);
 		}

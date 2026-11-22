@@ -278,8 +278,9 @@ const memoizedEffectDependencies = createRule("memoized-effect-dependencies", "r
 			if (isMemoHookCall(init)) return Stability.Memoized;
 
 			const stableKind = getStableHookKind(init);
-			if (stableKind === StableKind.Whole) return Stability.Memoized;
-			if (isStableIndex1Binding(stableKind, id, variableName)) return Stability.Memoized;
+			if (stableKind === StableKind.Whole || isStableIndex1Binding(stableKind, id, variableName)) {
+				return Stability.Memoized;
+			}
 
 			return getFallbackStability(mode);
 		}

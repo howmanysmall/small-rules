@@ -551,11 +551,16 @@ function matchGuardedEventFlagPattern(
 	stateSetterIdentifiers: ReadonlySet<string>,
 ): string | undefined {
 	const [guard, first, second] = statements;
-	if (first === undefined || second === undefined || !isIfStatement(guard)) return undefined;
 	/* v8 ignore next -- @preserve all tests pass IfStatements without an alternate branch. */
-	if (guard.alternate !== null) return undefined;
-
-	if (!isReturnWithoutArgument(guard.consequent)) return undefined;
+	if (
+		first === undefined ||
+		second === undefined ||
+		!isIfStatement(guard) ||
+		guard.alternate !== null ||
+		!isReturnWithoutArgument(guard.consequent)
+	) {
+		return undefined;
+	}
 
 	return matchFlagResetPair(
 		[first, second],
@@ -877,9 +882,10 @@ function hasOnlyNestedStatementsMatching(
 
 	for (const statement of statements) {
 		if (isIfStatement(statement)) {
-			if (statement.alternate !== null) return false;
-
-			if (!hasOnlyNestedStatementsMatching(getStatementsFromConsequent(statement.consequent), matches)) {
+			if (
+				statement.alternate !== null ||
+				!hasOnlyNestedStatementsMatching(getStatementsFromConsequent(statement.consequent), matches)
+			) {
 				return false;
 			}
 
@@ -973,8 +979,13 @@ function hasOnlySetterCallsWithArgument(
 ): boolean {
 	return hasOnlyNestedStatementsMatching(statements, (statement) => {
 		const callExpression = getCallExpressionFromStatement(statement);
-		if (callExpression === undefined || !isStateSetterCall(callExpression, stateSetterIdentifiers)) return false;
-		if (callExpression.arguments.length !== 1) return false;
+		if (
+			callExpression === undefined ||
+			!isStateSetterCall(callExpression, stateSetterIdentifiers) ||
+			callExpression.arguments.length !== 1
+		) {
+			return false;
+		}
 
 		const [argument] = callExpression.arguments;
 		return argument !== undefined && isArgumentMatch(argument);

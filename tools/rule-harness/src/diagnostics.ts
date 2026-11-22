@@ -70,7 +70,7 @@ function normalizeDiagnostic(diagnostic: HarnessValue, meta: UnknownRecord): Run
 	const message = getStringProperty(diagnostic, "message") ?? renderMessage(meta, messageId, data);
 	const node = getNodeProperty(diagnostic, "node");
 	const loc = getLocationProperty(diagnostic) ?? node?.loc;
-	const fix = getFixProvider(diagnostic, "fix");
+	const fix = getFixProvider(diagnostic);
 	const suggestions = normalizeSuggestions(diagnostic, meta);
 
 	const normalized: RuntimeDiagnostic = {
@@ -121,7 +121,7 @@ function normalizeSuggestions(diagnostic: UnknownRecord, meta: UnknownRecord): A
 				getStringProperty(suggestion, "message") ??
 				renderMessage(meta, messageId, data),
 		};
-		const fix = getFixProvider(suggestion, "fix");
+		const fix = getFixProvider(suggestion);
 		if (fix !== undefined) {
 			normalizedSuggestion.fix = fix;
 		}
@@ -265,8 +265,8 @@ function getDiagnosticData(diagnostic: UnknownRecord): UnknownRecord {
 	return getObjectProperty(diagnostic, "data") ?? {};
 }
 
-function getFixProvider(diagnostic: UnknownRecord, key: string): FixProvider | undefined {
-	const fix = getProperty(diagnostic, key);
+function getFixProvider(diagnostic: UnknownRecord): FixProvider | undefined {
+	const fix = getProperty(diagnostic, "fix");
 	return isFixProvider(fix) ? fix : undefined;
 }
 
@@ -304,9 +304,9 @@ function getLocationProperty(diagnostic: UnknownRecord): SourceLocation | undefi
 
 	const start = getObjectProperty(loc, "start");
 	const end = getObjectProperty(loc, "end");
-	if (start === undefined || end === undefined) return undefined;
-
 	if (
+		start === undefined ||
+		end === undefined ||
 		!Predicate.isNumber(start.line) ||
 		!Predicate.isNumber(start.column) ||
 		!Predicate.isNumber(end.line) ||

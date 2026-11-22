@@ -71,8 +71,13 @@ function getArrayIndexAssignment(
 	if (!isMemberExpression(left) || !left.computed) return undefined;
 
 	const { object, property } = left;
-	if (!isIdentifierNamed(object, arrayIdentifierName)) return undefined;
-	if (!isNumericLiteral(property) || property.value !== expectedIndex) return undefined;
+	if (
+		!isIdentifierNamed(object, arrayIdentifierName) ||
+		!isNumericLiteral(property) ||
+		property.value !== expectedIndex
+	) {
+		return undefined;
+	}
 
 	return { expression, statement };
 }
@@ -160,8 +165,7 @@ function getCandidate(
 	if (header === undefined) return undefined;
 
 	const { declaration, declarator } = header;
-	if (!isEmptyArrayInitializer(declarator.init, sourceCode)) return undefined;
-	if (!isBindingIdentifier(declarator.id)) return undefined;
+	if (!isEmptyArrayInitializer(declarator.init, sourceCode) || !isBindingIdentifier(declarator.id)) return undefined;
 
 	const arrayIdentifierName = declarator.id.name;
 

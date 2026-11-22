@@ -26,8 +26,14 @@ export function isGlobalReflectMethodCall(
 	callee: ESTree.Expression,
 	methodName: string,
 ): boolean {
-	if (!("property" in callee) || !("object" in callee) || !("computed" in callee)) return false;
-	if (!isGlobalReflect(sourceCode, callee.object)) return false;
+	if (
+		!("property" in callee) ||
+		!("object" in callee) ||
+		!("computed" in callee) ||
+		!isGlobalReflect(sourceCode, callee.object)
+	) {
+		return false;
+	}
 
 	return callee.computed
 		? isAnyLiteral(callee.property) && callee.property.value === methodName

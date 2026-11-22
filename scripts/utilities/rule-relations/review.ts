@@ -123,8 +123,7 @@ function evaluateOverrides(options: ReviewOptions): QualityEvaluation {
 }
 
 function isActionableReviewFinding(finding: ReportFinding): boolean {
-	if (finding.concern !== "relationship needs review") return true;
-	if (finding.judgments === undefined) return true;
+	if (finding.concern !== "relationship needs review" || finding.judgments === undefined) return true;
 
 	const { probabilities } = finding.judgments.assessment;
 	return probabilities["1"] >= probabilities["0"] || probabilities["2"] >= probabilities["0"];

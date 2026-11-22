@@ -30,11 +30,9 @@ function normalizeOptions(rawOptions: Options): NormalizedOptions {
 }
 
 function shouldCheckMethod(node: ESTree.MethodDefinition, options: NormalizedOptions): boolean {
-	if (node.static || node.kind !== "method") return false;
-
 	// Skip TypeScript overload signatures and abstract methods: both have no
 	// body to inspect.
-	if (!isFunctionExpression(node.value)) return false;
+	if (node.static || node.kind !== "method" || !isFunctionExpression(node.value)) return false;
 
 	const accessibility = node.accessibility ?? "public";
 	if (accessibility === "private" && !options.checkPrivate) return false;

@@ -447,8 +447,9 @@ export function isStaticArrayExpression(
 	options: StaticExpressionOptions,
 ): boolean {
 	for (const element of elements) {
-		if (element === null) return false;
-		if (isSpreadElement(element) || !isStaticExpression(sourceCode, element, seen, options)) return false;
+		if (element === null || isSpreadElement(element) || !isStaticExpression(sourceCode, element, seen, options)) {
+			return false;
+		}
 	}
 
 	return true;

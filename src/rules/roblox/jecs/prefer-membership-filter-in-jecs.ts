@@ -37,12 +37,16 @@ interface MembershipCandidate {
 }
 
 function getStaticMethodCall(expression: ESTree.Expression): StaticMethodCall | undefined {
-	if (!isCallExpression(expression) || !isMemberExpression(expression.callee) || expression.callee.computed) {
+	/* v8 ignore next -- a non-computed ESTree member property is an identifier. @preserve */
+	if (
+		!isCallExpression(expression) ||
+		!isMemberExpression(expression.callee) ||
+		expression.callee.computed ||
+		!isIdentifier(expression.callee.property)
+	) {
 		return undefined;
 	}
 
-	/* v8 ignore next -- a non-computed ESTree member property is an identifier. @preserve */
-	if (!isIdentifier(expression.callee.property)) return undefined;
 	return { call: expression, method: expression.callee.property.name, object: expression.callee.object };
 }
 

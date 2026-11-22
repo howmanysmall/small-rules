@@ -139,8 +139,14 @@ function getRuleRunnerInvocation(node: CallExpression): RunnerInvocation | undef
 	if (!isRuleRunner(node.callee)) return undefined;
 
 	const [ruleNameNode, , casesNode] = node.arguments;
-	if (!isStringLiteral(ruleNameNode) || casesNode?.type !== "ObjectExpression") return undefined;
-	if (node.callee.type !== "MemberExpression" || node.callee.object.type !== "Identifier") return undefined;
+	if (
+		!isStringLiteral(ruleNameNode) ||
+		casesNode?.type !== "ObjectExpression" ||
+		node.callee.type !== "MemberExpression" ||
+		node.callee.object.type !== "Identifier"
+	) {
+		return undefined;
+	}
 
 	return { cases: casesNode, language: node.callee.object.name, ruleName: ruleNameNode.value };
 }

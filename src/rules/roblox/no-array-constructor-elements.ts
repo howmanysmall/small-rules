@@ -88,8 +88,7 @@ const DEFAULT_OPTIONS: Required<NoArrayConstructorElementsOptions> = {
 };
 
 function extractElementTypeFromArrayAnnotation(typeNode: ESTree.TSType, sourceCode: SourceCode): string | undefined {
-	if (!isTsTypeReference(typeNode)) return undefined;
-	if (!isIdentifier(typeNode.typeName)) return undefined;
+	if (!isTsTypeReference(typeNode) || !isIdentifier(typeNode.typeName)) return undefined;
 	if (typeNode.typeName.name !== "Array" && typeNode.typeName.name !== "ReadonlyArray") return undefined;
 	if (typeNode.typeArguments?.params.length !== 1) return undefined;
 
@@ -179,10 +178,15 @@ function getPushCallForIdentifier(
 	identifierName: string,
 ): ESTree.CallExpression | undefined {
 	const unwrapped = stripExpressionWrappers(expression);
-	if (!isCallExpression(unwrapped) || unwrapped.optional) return undefined;
-	if (!isMemberExpression(unwrapped.callee) || unwrapped.callee.optional) return undefined;
-
-	if (!isIdentifierNamed(unwrapped.callee.object, identifierName)) return undefined;
+	if (
+		!isCallExpression(unwrapped) ||
+		unwrapped.optional ||
+		!isMemberExpression(unwrapped.callee) ||
+		unwrapped.callee.optional ||
+		!isIdentifierNamed(unwrapped.callee.object, identifierName)
+	) {
+		return undefined;
+	}
 
 	return getMemberPropertyName(unwrapped.callee) === "push" ? unwrapped : undefined;
 }
@@ -456,16 +460,21 @@ function getPushCollapseCandidate(
 	if (statement === undefined || !isVariableDeclaration(statement)) return undefined;
 	if (statement.kind !== "const" && statement.kind !== "let") return undefined;
 	const declarator = getSingleIdentifierDeclarator(statement);
-	if (declarator === undefined) return undefined;
-	if (declarator.init === null || !isNewExpression(declarator.init)) return undefined;
-	if (!isGlobalArrayConstructor(sourceCode, declarator.init)) return undefined;
-	if (declarator.init.arguments.length > 0) return undefined;
-	if (isReadonlyArrayAnnotation(getBindingTypeAnnotation(declarator.id))) return undefined;
+
+	if (
+		!isNewExpression(declarator?.init) ||
+		!isGlobalArrayConstructor(sourceCode, declarator.init) ||
+		declarator.init.arguments.length > 0 ||
+		isReadonlyArrayAnnotation(getBindingTypeAnnotation(declarator.id))
+	) {
+		return undefined;
+	}
 
 	const arrayIdentifierName = declarator.id.name;
 	const scan = scanPushStatements(sourceCode, statements, index + 1, arrayIdentifierName);
-	if (scan.pushStatements.length === 0) return undefined;
-	if (containsLaterPushCall(statements, scan.nextIndex, arrayIdentifierName)) return undefined;
+	if (scan.pushStatements.length === 0 || containsLaterPushCall(statements, scan.nextIndex, arrayIdentifierName)) {
+		return undefined;
+	}
 
 	const { typeArguments } = declarator.init;
 	const hasGeneric = typeArguments !== undefined && typeArguments !== null;

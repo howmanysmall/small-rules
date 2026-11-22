@@ -243,8 +243,9 @@ const reactHooksStrictReturn = createRule("react-hooks-strict-return", "react", 
 		}
 
 		function checkReturnStatement(node: ESTree.ReturnStatement): void {
-			if (functionIsHookStack.at(-1) !== true) return;
-			if (node.argument === null || isObjectExpression(node.argument)) return;
+			if (functionIsHookStack.at(-1) !== true || node.argument === null || isObjectExpression(node.argument)) {
+				return;
+			}
 
 			if (isIdentifier(node.argument)) {
 				checkIdentifierReturn(node, node.argument);

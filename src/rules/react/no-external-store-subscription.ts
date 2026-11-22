@@ -47,13 +47,12 @@ function collectCleanupVariables(
 			// unresolved bindings as `undefined`; the widened annotation makes
 			// the runtime shape visible to lint.
 			const resolved: null | undefined | Variable = upstreamReference.resolved;
-			// oxlint-disable-next-line typescript/no-unnecessary-condition -- harness exposes unresolved refs as undefined despite the declared type.
-			if (resolved === null || resolved === undefined) continue;
 			// Import-bound variables (e.g. the `useState` callee) are shared by
 			// every setter's upstream chain; ignoring them preserves the upstream
 			// rule's behavior, where unresolved globals were skipped the same
 			// way.
-			if (isImportBoundVariable(resolved)) continue;
+			// oxlint-disable-next-line typescript/no-unnecessary-condition -- harness exposes unresolved refs as undefined despite the declared type.
+			if (resolved === null || resolved === undefined || isImportBoundVariable(resolved)) continue;
 			cleanupVariables.add(resolved);
 		}
 	}
@@ -89,12 +88,11 @@ function reportSharedCleanupSetters(
 
 const noExternalStoreSubscription = createReactEffectRule("no-external-store-subscription", {
 	checkEffect(context, analysis, effect): void {
-		if (effect.cleanup === undefined) return;
 		// `getEffectCleanup` filters out bare `return;` (argument
 		// === null), so a cleanup ReturnStatement always carries an
 		// argument here.
 		/* v8 ignore next -- bare returns never reach this check. @preserve */
-		if (effect.cleanup.argument === null) return;
+		if (!effect.cleanup?.argument) return;
 
 		const bodySetters = getBodySetters(analysis, effect);
 		if (bodySetters.length === 0) return;

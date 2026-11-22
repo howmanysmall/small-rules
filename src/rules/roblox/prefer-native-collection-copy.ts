@@ -77,19 +77,23 @@ function containsIdentifier(node: ESTree.Node, name: string): boolean {
 
 function isMapCopyCall(call: ESTree.CallExpression, loopDeclarator: ESTree.VariableDeclarator): boolean {
 	/* v8 ignore next -- the caller only passes statically named member calls. @preserve */
-	if (!isMemberExpression(call.callee) || !isIdentifierNamed(call.callee.property, "set")) return false;
-
-	if (call.arguments.length !== 2 || !isArrayPattern(loopDeclarator.id) || loopDeclarator.id.elements.length !== 2) {
+	if (
+		!isMemberExpression(call.callee) ||
+		!isIdentifierNamed(call.callee.property, "set") ||
+		call.arguments.length !== 2 ||
+		!isArrayPattern(loopDeclarator.id) ||
+		loopDeclarator.id.elements.length !== 2
+	) {
 		return false;
 	}
 
 	const [keyBinding, valueBinding] = loopDeclarator.id.elements;
 	const [keyArgument, valueArgument] = call.arguments;
-	if (keyBinding === null || valueBinding === null || keyArgument === undefined || valueArgument === undefined) {
-		return false;
-	}
-
 	if (
+		keyBinding === null ||
+		valueBinding === null ||
+		keyArgument === undefined ||
+		valueArgument === undefined ||
 		!isIdentifier(keyBinding) ||
 		!isIdentifier(valueBinding) ||
 		isSpreadElement(keyArgument) ||
@@ -102,8 +106,14 @@ function isMapCopyCall(call: ESTree.CallExpression, loopDeclarator: ESTree.Varia
 }
 
 function isSetCopyCall(call: ESTree.CallExpression, loopDeclarator: ESTree.VariableDeclarator): boolean {
-	if (!isMemberExpression(call.callee) || !isIdentifierNamed(call.callee.property, "add")) return false;
-	if (call.arguments.length !== 1 || !isIdentifier(loopDeclarator.id)) return false;
+	if (
+		!isMemberExpression(call.callee) ||
+		!isIdentifierNamed(call.callee.property, "add") ||
+		call.arguments.length !== 1 ||
+		!isIdentifier(loopDeclarator.id)
+	) {
+		return false;
+	}
 
 	const [valueArgument] = call.arguments;
 	/* v8 ignore next -- the length check proves the element exists. @preserve */
@@ -119,13 +129,24 @@ function isMatchingCopyLoop(
 	if (!isVariableDeclaration(loop.left) || loop.left.declarations.length !== 1) return false;
 	const [loopDeclarator] = loop.left.declarations;
 	/* v8 ignore next -- the length check proves the element exists. @preserve */
-	if (loopDeclarator === undefined || loopDeclarator.init !== null) return false;
-	if (getNativeCollectionKind(sourceCode, loop.right) !== destination.kind) return false;
-	if (containsIdentifier(loop.right, destination.identifier.name)) return false;
+	if (
+		loopDeclarator === undefined ||
+		loopDeclarator.init !== null ||
+		getNativeCollectionKind(sourceCode, loop.right) !== destination.kind ||
+		containsIdentifier(loop.right, destination.identifier.name)
+	) {
+		return false;
+	}
 
 	const call = getSingleLoopCall(loop);
-	if (call === undefined || !isMemberExpression(call.callee) || call.callee.computed) return false;
-	if (!isIdentifierNamed(call.callee.object, destination.identifier.name)) return false;
+	if (
+		call === undefined ||
+		!isMemberExpression(call.callee) ||
+		call.callee.computed ||
+		!isIdentifierNamed(call.callee.object, destination.identifier.name)
+	) {
+		return false;
+	}
 
 	return destination.kind === "Map" ? isMapCopyCall(call, loopDeclarator) : isSetCopyCall(call, loopDeclarator);
 }

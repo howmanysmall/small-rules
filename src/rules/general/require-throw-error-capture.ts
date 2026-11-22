@@ -315,9 +315,13 @@ const requireThrowErrorCapture = createRule("require-throw-error-capture", "gene
 				if (!isNewExpression(argument)) return;
 
 				const { callee } = argument;
-				if (!isIdentifier(callee) || !callee.name.endsWith("Error")) return;
-
-				if (isAllowedError(sourceCode, physicalFilename, callee, allowList)) return;
+				if (
+					!isIdentifier(callee) ||
+					!callee.name.endsWith("Error") ||
+					isAllowedError(sourceCode, physicalFilename, callee, allowList)
+				) {
+					return;
+				}
 
 				const functionName = getEnclosingFunctionName(node);
 				if (functionName === undefined) return;

@@ -111,8 +111,7 @@ function getConnectCallback(
 	eventsIdentifiers: ReadonlySet<string>,
 ): CallbackFunction | undefined {
 	const unwrappedCallee = unwrapNode(node.callee);
-	if (!isMemberExpression(unwrappedCallee)) return undefined;
-	if (getMemberPropertyName(unwrappedCallee) !== "connect") return undefined;
+	if (!isMemberExpression(unwrappedCallee) || getMemberPropertyName(unwrappedCallee) !== "connect") return undefined;
 
 	const rootIdentifier = getRootIdentifierName(unwrappedCallee.object);
 	if (rootIdentifier === undefined || !eventsIdentifiers.has(rootIdentifier)) return undefined;
@@ -391,8 +390,7 @@ const noEventsInEventsCallback = createRule("no-events-in-events-callback", "rob
 
 		function getCurrentTopLevelCallbackState(): CallbackState | undefined {
 			const current = functionStack.at(-1);
-			if (!current?.callbackState) return undefined;
-			if (current.callbackDepth > 0) return undefined;
+			if (!current?.callbackState || current.callbackDepth > 0) return undefined;
 			return current.callbackState;
 		}
 

@@ -4,6 +4,7 @@
 	"private": true,
 	"type": "module",
 	"exports": {
-		".": "./small-rules.js"
+		".": "./small-rules.js",
+		"./package.json": "./package.json"
 	}
 }

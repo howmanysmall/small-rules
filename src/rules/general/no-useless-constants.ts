@@ -405,11 +405,17 @@ function getDeclaratorParts(node: ESTree.Node): DeclaratorParts | undefined {
 }
 
 function getSingleDeclaration(parent: ESTree.Node | null): ESTree.VariableDeclaration | undefined {
-	/* v8 ignore next -- @preserve ESLint variable definitions for Variable defs are parented by their VariableDeclaration. */
-	if (parent === null || !isVariableDeclaration(parent)) return undefined;
-	if (parent.kind !== "const") return undefined;
-	if (parent.declarations.length !== 1) return undefined;
-	if (isExportNamedDeclaration(parent.parent)) return undefined;
+	/* v8 ignore next -- @preserve ESLint variable definitions for Variable defs are parented by their VariableDeclaration. @preserve */
+	if (
+		parent === null ||
+		!isVariableDeclaration(parent) ||
+		parent.kind !== "const" ||
+		parent.declarations.length !== 1 ||
+		isExportNamedDeclaration(parent.parent)
+	) {
+		return undefined;
+	}
+
 	return parent;
 }
 
@@ -433,9 +439,8 @@ function getEnclosingConstDeclaration(identifier: ESTree.BindingIdentifier): EST
 	if (enclosingDeclarator === undefined) return undefined;
 
 	const enclosingDeclaration = enclosingDeclarator.parent;
-	/* v8 ignore next -- @preserve declarator parents are always VariableDeclarations (mistyped) */
-	if (!isVariableDeclaration(enclosingDeclaration)) return undefined;
-	if (enclosingDeclaration.kind !== "const") return undefined;
+	/* v8 ignore next -- @preserve declarator parents are always VariableDeclarations (mistyped) @preserve */
+	if (!isVariableDeclaration(enclosingDeclaration) || enclosingDeclaration.kind !== "const") return undefined;
 	return enclosingDeclaration;
 }
 

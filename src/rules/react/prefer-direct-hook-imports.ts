@@ -34,8 +34,7 @@ const preferDirectHookImports = createRule("prefer-direct-hook-imports", "react"
 		return {
 			CallExpression(node): void {
 				const callee = getStaticMemberCallee(node);
-				if (callee === undefined) return;
-				if (!isIdentifier(callee.object) || !isIdentifier(callee.property)) return;
+				if (callee === undefined || !isIdentifier(callee.object) || !isIdentifier(callee.property)) return;
 
 				const propertyName = callee.property.name;
 				if (!HOOK_NAME_PATTERN.test(propertyName) || allowedHooks.has(propertyName)) return;

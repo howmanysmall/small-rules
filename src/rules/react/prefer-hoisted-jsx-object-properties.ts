@@ -56,10 +56,8 @@ function isModuleConstDeclaration(
 	parent: ESTree.VariableDeclarator,
 	current: ESTree.Node,
 ): boolean {
-	/* v8 ignore next -- @preserve non-identifier module bindings cannot be referenced as JSX constants. */
-	if (!isIdentifier(parent.id)) return false;
-	/* v8 ignore next -- @preserve walkable JSX parents are followed only through initializer positions. */
-	if (parent.init !== current) return false;
+	/* v8 ignore next -- non-identifier module bindings cannot be referenced as JSX constants, and walkable JSX parents are followed only through initializer positions. @preserve */
+	if (!isIdentifier(parent.id) || parent.init !== current) return false;
 
 	const scope = context.sourceCode.getScope(node);
 	const variable = getVariableByName(scope, parent.id.name);

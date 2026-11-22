@@ -58,8 +58,14 @@ function isTestFrameworkObject(
 }
 
 function isModuleMockCall(sourceCode: SourceCode, callee: ESTree.Expression): boolean {
-	if (!("property" in callee) || !("object" in callee) || !("computed" in callee)) return false;
-	if (!isTestFrameworkObject(sourceCode, callee.object)) return false;
+	if (
+		!("property" in callee) ||
+		!("object" in callee) ||
+		!("computed" in callee) ||
+		!isTestFrameworkObject(sourceCode, callee.object)
+	) {
+		return false;
+	}
 
 	if (callee.computed) return isStringLiteral(callee.property) && MODULE_MOCK_METHODS.has(callee.property.value);
 

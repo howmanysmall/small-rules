@@ -159,16 +159,25 @@ function areEquivalentBinary(
 }
 
 function areEquivalentCall(left: ESTree.CallExpression, right: ESTree.CallExpression, sourceCode: SourceCode): boolean {
-	if (left.optional !== right.optional) return false;
-	if (!areEquivalentExpressionOrSuper(left.callee, right.callee, sourceCode)) return false;
-	if (left.arguments.length !== right.arguments.length) return false;
+	if (
+		left.optional !== right.optional ||
+		!areEquivalentExpressionOrSuper(left.callee, right.callee, sourceCode) ||
+		left.arguments.length !== right.arguments.length
+	) {
+		return false;
+	}
 
 	for (let index = 0; index < left.arguments.length; index += 1) {
 		const leftArgument = left.arguments[index];
 		const rightArgument = right.arguments[index];
 		/* v8 ignore next -- loop bounds ensure dense argument arrays on both parser-produced call nodes. @preserve */
-		if (leftArgument === undefined || rightArgument === undefined) return false;
-		if (!areEquivalentArgument(leftArgument, rightArgument, sourceCode)) return false;
+		if (
+			leftArgument === undefined ||
+			rightArgument === undefined ||
+			!areEquivalentArgument(leftArgument, rightArgument, sourceCode)
+		) {
+			return false;
+		}
 	}
 
 	return true;
@@ -261,9 +270,15 @@ function isWhitespaceText(child: ESTree.JSXChild): boolean {
 }
 
 function getBranchCandidate(child: ESTree.JSXChild): BranchCandidate | undefined {
-	if (!isJsxExpressionContainer(child) || isJsxEmptyExpression(child.expression)) return undefined;
-	if (!isLogicalExpression(child.expression)) return undefined;
-	if (child.expression.operator !== "&&" || !canRender(child.expression.right)) return undefined;
+	if (
+		!isJsxExpressionContainer(child) ||
+		isJsxEmptyExpression(child.expression) ||
+		!isLogicalExpression(child.expression) ||
+		child.expression.operator !== "&&" ||
+		!canRender(child.expression.right)
+	) {
+		return undefined;
+	}
 
 	return {
 		condition: child.expression.left,

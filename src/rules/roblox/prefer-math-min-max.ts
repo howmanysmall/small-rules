@@ -143,10 +143,14 @@ function getPreferredMathMethod(sourceCode: SourceCode, node: ESTree.Conditional
 
 	const { alternate, consequent, test } = node;
 	const { left, operator, right } = test;
-	/* v8 ignore next -- @preserve binary expressions cannot contain PrivateIdentifier operands in this parser shape. */
-	if (!isExpressionOperand(left) || !isExpressionOperand(right)) return undefined;
-
-	if (!hasComparableNumberOperands(sourceCode, left, right)) return undefined;
+	/* v8 ignore next -- @preserve binary expressions cannot contain PrivateIdentifier operands in this parser shape. @preserve */
+	if (
+		!isExpressionOperand(left) ||
+		!isExpressionOperand(right) ||
+		!hasComparableNumberOperands(sourceCode, left, right)
+	) {
+		return undefined;
+	}
 
 	const leftText = getComparableText(sourceCode, left);
 	const rightText = getComparableText(sourceCode, right);

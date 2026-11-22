@@ -98,9 +98,14 @@ const sourceCodeRule = defineRule({
 		return {
 			"Program:exit"(node): void {
 				const [statement] = node.body;
-				if (statement === undefined) return;
-				if (context.sourceCode.getAllComments().length !== 2) return;
-				if (context.sourceCode.getCommentsBefore(statement).length === 1) return;
+				if (
+					statement === undefined ||
+					context.sourceCode.getAllComments().length !== 2 ||
+					context.sourceCode.getCommentsBefore(statement).length === 1
+				) {
+					return;
+				}
+
 				context.report({ messageId: "comments", node });
 			},
 			VariableDeclarator(node): void {

@@ -290,7 +290,7 @@ function resolveEffectFunction(
 	if (definitionNode === undefined) return undefined;
 
 	return isCallbackFunction(definitionNode) || isBlockStatement(definitionNode) ? definitionNode : undefined;
-	/* v8 ignore stop */
+	/* v8 ignore stop -- closes the ignored range opened above. */
 }
 
 function getDependencyReferences(
@@ -323,7 +323,7 @@ function getDefinitionValueNode(node: ESTree.Node): ESTree.Node | undefined {
 	}
 
 	return undefined;
-	/* v8 ignore stop */
+	/* v8 ignore stop -- closes the ignored range opened above. */
 }
 
 function isUppercaseStart(name: string): boolean {
@@ -341,12 +341,19 @@ function isFunctionalComponent(node: ESTree.Node): boolean {
 }
 
 function isWrappedInline(candidate: ESTree.Node): boolean {
-	if (!isVariableDeclarator(candidate) || !isCallExpression(candidate.init)) return false;
 	/* v8 ignore next -- non-Identifier HOC callees never reach the pure-HOC check in tests. @preserve */
-	if (!isIdentifier(candidate.init.callee) || KNOWN_PURE_HOCS.has(candidate.init.callee.name)) return false;
+	if (
+		!isVariableDeclarator(candidate) ||
+		!isCallExpression(candidate.init) ||
+		!isIdentifier(candidate.init.callee) ||
+		KNOWN_PURE_HOCS.has(candidate.init.callee.name)
+	) {
+		return false;
+	}
 	/* v8 ignore start -- @preserve the arrow arm is exercised by the memo/withRouter cases; the FunctionExpression arm never executes (probed). */
+
 	return isCallbackFunction(candidate.init.arguments[0]);
-	/* v8 ignore stop */
+	/* v8 ignore stop -- closes the ignored range opened above. */
 }
 
 function isFunctionalHOC(state: ReactEffectAnalysisState, node: ESTree.Node): boolean {
@@ -371,7 +378,7 @@ function isFunctionalHOC(state: ReactEffectAnalysisState, node: ESTree.Node): bo
 				return isIdentifier(parent.callee) && !KNOWN_PURE_HOCS.has(parent.callee.name);
 			}) ?? false
 		);
-		/* v8 ignore stop */
+		/* v8 ignore stop -- closes the ignored range opened above. */
 	}
 
 	return isFunctionalComponent(node) && (isWrappedInline(node) || isWrappedSeparately(node));
@@ -416,7 +423,7 @@ function isUseRef(state: ReactEffectAnalysisState, node: ESTree.Node): boolean {
 	if (!isIdentifier(node)) return false;
 	return node.name === USE_REF_HOOK_NAME || isBindingImportedCall(state, node, USE_REF_HOOK_NAME);
 }
-/* v8 ignore stop */
+/* v8 ignore stop -- closes the ignored range opened above. */
 
 function isUseEffect(state: ReactEffectAnalysisState, node: ESTree.Node): boolean {
 	/* v8 ignore next -- isUseEffect is only called with CallExpression nodes from the program call index. @preserve */
@@ -439,7 +446,7 @@ function isReactMemberCall(state: ReactEffectAnalysisState, node: ESTree.MemberE
 function getVariableByName(state: ReactEffectAnalysisState, identifier: ESTree.Node): undefined | Variable {
 	/* v8 ignore start -- @preserve callers only pass identifier-shaped nodes from parser-valid ASTs. */
 	if (!isIdentifier(identifier)) return undefined;
-	/* v8 ignore stop */
+	/* v8 ignore stop -- closes the ignored range opened above. */
 	const { name } = identifier;
 	const scope = state.sourceCode.getScope(identifier);
 	let current: null | Scope = scope;
@@ -523,7 +530,7 @@ function isConstant(reference: Reference): boolean {
 		const { init } = definition.node;
 		return isAnyLiteral(init) || isTemplateLiteral(init) || isArrayExpression(init) || isObjectExpression(init);
 	});
-	/* v8 ignore stop */
+	/* v8 ignore stop -- closes the ignored range opened above. */
 }
 
 function isRef(state: ReactEffectAnalysisState, reference: Reference): boolean {
@@ -539,7 +546,7 @@ function isRef(state: ReactEffectAnalysisState, reference: Reference): boolean {
 			);
 		}) ?? false
 	);
-	/* v8 ignore stop */
+	/* v8 ignore stop -- closes the ignored range opened above. */
 }
 
 function isRefCurrent(reference: Reference): boolean {
@@ -579,7 +586,7 @@ function getUseStateDeclaration(
 	/* v8 ignore start -- @preserve state-call references always have a useState declaration upstream. */
 	const upstreamIdentifier = upstream?.identifier;
 	if (upstreamIdentifier === undefined) return undefined;
-	/* v8 ignore stop */
+	/* v8 ignore stop -- closes the ignored range opened above. */
 	let result: ESTree.Node = upstreamIdentifier;
 	while (!isVariableDeclarator(result)) {
 		const parent: ESTree.Node | null = result.parent;
@@ -636,8 +643,13 @@ export function getReportableEffectCall(
 	isReportableReference: (candidate: Reference) => boolean,
 ): ESTree.CallExpression | undefined {
 	/* v8 ignore next -- effect traversal skips call arguments, so no non-synchronous prop-call reference is ever collected. @preserve */
-	if (!analysis.scope.isSynchronousWithin(reference.identifier, effect.functionNode)) return undefined;
-	if (!isReportableReference(reference)) return undefined;
+	if (
+		!analysis.scope.isSynchronousWithin(reference.identifier, effect.functionNode) ||
+		!isReportableReference(reference)
+	) {
+		return undefined;
+	}
+
 	return analysis.scope.getCallExpression(reference);
 }
 
@@ -659,5 +671,5 @@ function toReactOwner(node: ESTree.Node): ReactOwner | undefined {
 	if (isFunctionDeclaration(node)) return node;
 	/* v8 ignore start -- @preserve toReactOwner is only called with nodes already matched as components/HOCs/custom hooks; the fallback never executes. */
 	return isVariableDeclarator(node) ? node : undefined;
-	/* v8 ignore stop */
+	/* v8 ignore stop -- closes the ignored range opened above. */
 }

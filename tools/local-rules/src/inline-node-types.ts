@@ -25,8 +25,7 @@ export function isEqualityOperator(operator: string): boolean {
  */
 export function getTypeReadMember(node: ESTree.Node): ESTree.MemberExpression | undefined {
 	const member = isChainExpression(node) ? node.expression : node;
-	if (!isMemberExpression(member) || member.computed) return undefined;
-	if (!isIdentifierNamed(member.property, "type")) return undefined;
+	if (!isMemberExpression(member) || member.computed || !isIdentifierNamed(member.property, "type")) return undefined;
 	return member;
 }
 

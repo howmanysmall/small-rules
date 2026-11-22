@@ -30,9 +30,9 @@ import type { ESTree, Visitor } from "oxlint-plugin-utilities";
 import type { TypeEnvironment, UnsafeDictionary } from "$oxc-utilities/anti-slop/dictionary-types";
 
 function isPlainAliasConsumerUse(type: ESTree.TSType, environment: TypeEnvironment): boolean {
-	if (!isTsTypeReference(type) || (type.typeArguments?.params.length ?? 0) > 0) return false;
-
 	if (
+		!isTsTypeReference(type) ||
+		(type.typeArguments?.params.length ?? 0) > 0 ||
 		!isBindingIdentifier(type.typeName) ||
 		getVisibleTypeAlias(type.typeName.name, type, environment.typeAliases) === undefined
 	) {
@@ -64,8 +64,7 @@ function getReportableUnsafeDictionary(
 	type: ESTree.TSType,
 	environment: TypeEnvironment,
 ): undefined | UnsafeDictionary {
-	if (isInsideTypeParameterConstraint(type)) return undefined;
-	if (isPlainAliasConsumerUse(type, environment)) return undefined;
+	if (isInsideTypeParameterConstraint(type) || isPlainAliasConsumerUse(type, environment)) return undefined;
 
 	const unsafe = classifyUnsafeDictionary(type, environment);
 	if (unsafe === undefined) return undefined;

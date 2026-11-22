@@ -43,8 +43,7 @@ const pythonEditBlock = Plugin.define({
 				if (!SHELL_TOOLS.has(event.tool)) return Effect.void;
 
 				const { input } = event;
-				if (!isCommandInput.allows(input)) return Effect.void;
-				if (!editsFilesWithPython(input.command)) return Effect.void;
+				if (!isCommandInput.allows(input) || !editsFilesWithPython(input.command)) return Effect.void;
 
 				return Effect.fail(new Tool.Error({ message: DENIAL }));
 			});

@@ -27,8 +27,15 @@ export function isPrimarilyVerb(response: unknown, word: string): boolean {
 	if (!Array.isArray(response)) return false;
 
 	const [hit]: ReadonlyArray<unknown> = response;
-	if (!Predicate.isObject(hit) || !("word" in hit) || hit.word !== word) return false;
-	if (!("tags" in hit) || !Array.isArray(hit.tags)) return false;
+	if (
+		!Predicate.isObject(hit) ||
+		!("word" in hit) ||
+		hit.word !== word ||
+		!("tags" in hit) ||
+		!Array.isArray(hit.tags)
+	) {
+		return false;
+	}
 
 	for (const tag of hit.tags) {
 		if (Predicate.isString(tag) && PARTS_OF_SPEECH.has(tag)) return tag === "v";

@@ -148,9 +148,8 @@ function getVariableTypeAnnotation(
 		return definition.node.id.typeAnnotation ?? undefined;
 	}
 
-	if (definition.type !== "Parameter") return undefined;
 	/* v8 ignore next -- Parameter definitions own function-like nodes. @preserve */
-	if (!isFunctionLike(definition.node)) return undefined;
+	if (definition.type !== "Parameter" || !isFunctionLike(definition.node)) return undefined;
 
 	for (const parameter of definition.node.params) {
 		if (getFunctionParameterBindingName(parameter, sourceCode) === variable.name) {

@@ -230,8 +230,7 @@ function getFunctionAssertionOperands(
 	node: ESTree.CallExpression,
 	imports: ReadonlyMap<string, ImportedAssertionKind>,
 ): readonly [ESTree.Expression, ESTree.Expression] | undefined {
-	if (!isIdentifier(node.callee)) return undefined;
-	if (imports.get(node.callee.name) !== "function") return undefined;
+	if (!isIdentifier(node.callee) || imports.get(node.callee.name) !== "function") return undefined;
 	return getCallPairArguments(node);
 }
 
@@ -249,8 +248,10 @@ function getAssertMethodOperands(
 	imports: ReadonlyMap<string, ImportedAssertionKind>,
 ): readonly [ESTree.Expression, ESTree.Expression] | undefined {
 	const callee = getMatchedMethodCallee(node, EXACT_ASSERTION_METHODS);
-	if (callee === undefined || !isIdentifier(callee.object)) return undefined;
-	if (imports.get(callee.object.name) !== "assert") return undefined;
+	if (callee === undefined || !isIdentifier(callee.object) || imports.get(callee.object.name) !== "assert") {
+		return undefined;
+	}
+
 	return getCallPairArguments(node);
 }
 
@@ -263,8 +264,7 @@ function isExpectCallReceiver(
 	receiver: ESTree.Expression,
 	imports: ReadonlyMap<string, ImportedAssertionKind>,
 ): receiver is ESTree.CallExpression {
-	if (!isCallExpression(receiver)) return false;
-	if (!isIdentifier(receiver.callee)) return false;
+	if (!isCallExpression(receiver) || !isIdentifier(receiver.callee)) return false;
 	return imports.get(receiver.callee.name) === "expect";
 }
 
@@ -384,9 +384,8 @@ function isFloatingEquality(
 	node: ESTree.BinaryExpression,
 	isFloating: (expression: ESTree.Expression) => boolean,
 ): boolean {
-	if (!EQUALITY_OPERATORS.has(node.operator)) return false;
-	/* v8 ignore next -- @preserve private-identifier operands only occur with `in`, which the operator check above rejects. */
-	if (!isComparableBinary(node)) return false;
+	/* v8 ignore next -- @preserve private-identifier operands only occur with `in`, which the operator check above rejects. @preserve */
+	if (!EQUALITY_OPERATORS.has(node.operator) || !isComparableBinary(node)) return false;
 	return isFloating(node.left) || isFloating(node.right);
 }
 

@@ -263,8 +263,10 @@ function getDirectCalleeName(callee: ESTree.Expression): string | undefined {
 }
 
 function getThisMethodCalleeName(callee: ESTree.Expression): string | undefined {
-	if (!isMemberExpression(callee) || !isThisExpression(callee.object)) return undefined;
-	if (!isBindingIdentifier(callee.property)) return undefined;
+	if (!isMemberExpression(callee) || !isThisExpression(callee.object) || !isBindingIdentifier(callee.property)) {
+		return undefined;
+	}
+
 	return callee.property.name;
 }
 

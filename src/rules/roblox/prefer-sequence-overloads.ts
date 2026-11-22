@@ -27,14 +27,21 @@ function getSequenceKeypointName(sequenceName: string): string | undefined {
 }
 
 function getKeypointValue(node: ESTree.Expression, keypointName: string, time: number): ESTree.Expression | undefined {
-	if (!isNewExpression(node) || !isNamedGlobalCall(node, keypointName)) return undefined;
-	if (node.arguments.length !== 2) return undefined;
+	if (!isNewExpression(node) || !isNamedGlobalCall(node, keypointName) || node.arguments.length !== 2) {
+		return undefined;
+	}
 
 	const [timeArgument, valueArgument] = node.arguments;
-	/* v8 ignore next -- @preserve length was checked above; this only guards malformed AST tuples. */
-	if (timeArgument === undefined || isSpreadElement(timeArgument)) return undefined;
-	/* v8 ignore next -- @preserve length was checked above; this only guards malformed AST tuples. */
-	if (valueArgument === undefined || isSpreadElement(valueArgument)) return undefined;
+	/* v8 ignore next -- length was checked above; this only guards malformed AST tuples. @preserve */
+	if (
+		timeArgument === undefined ||
+		valueArgument === undefined ||
+		isSpreadElement(timeArgument) ||
+		isSpreadElement(valueArgument)
+	) {
+		return undefined;
+	}
+
 	return isNumericLiteralValue(timeArgument, time) ? valueArgument : undefined;
 }
 
@@ -82,12 +89,11 @@ function isReplayable(expression: ESTree.Expression, sourceCode: SourceCode): bo
 		if (
 			!isIdentifier(datatype) ||
 			!PURE_DATATYPES.has(datatype.name) ||
-			hasShadowedBinding(sourceCode, datatype, datatype.name)
+			hasShadowedBinding(sourceCode, datatype, datatype.name) ||
+			!appendCallArguments(unwrapped, worklist)
 		) {
 			return false;
 		}
-
-		if (!appendCallArguments(unwrapped, worklist)) return false;
 	}
 
 	return true;
@@ -116,10 +122,15 @@ function getDirectArgumentReplacement(
 	if (node.arguments.length !== 2) return undefined;
 
 	const [firstArgument, secondArgument] = node.arguments;
-	/* v8 ignore next -- @preserve length was checked above; this only guards malformed AST tuples. */
-	if (firstArgument === undefined || isSpreadElement(firstArgument)) return undefined;
-	/* v8 ignore next -- @preserve length was checked above; this only guards malformed AST tuples. */
-	if (secondArgument === undefined || isSpreadElement(secondArgument)) return undefined;
+	/* v8 ignore next -- length was checked above; this only guards malformed AST tuples. @preserve */
+	if (
+		firstArgument === undefined ||
+		secondArgument === undefined ||
+		isSpreadElement(firstArgument) ||
+		isSpreadElement(secondArgument)
+	) {
+		return undefined;
+	}
 
 	const firstText = getListElementText(context.sourceCode, stripParenthesis(firstArgument));
 	const secondText = getListElementText(context.sourceCode, stripParenthesis(secondArgument));
@@ -140,14 +151,27 @@ function getKeypointArrayReplacement(
 	if (node.arguments.length !== 1) return undefined;
 
 	const [onlyArgument] = node.arguments;
-	if (onlyArgument === undefined || isSpreadElement(onlyArgument)) return undefined;
-	if (!isArrayExpression(onlyArgument) || onlyArgument.elements.length !== 2) return undefined;
+	if (
+		onlyArgument === undefined ||
+		isSpreadElement(onlyArgument) ||
+		!isArrayExpression(onlyArgument) ||
+		onlyArgument.elements.length !== 2
+	) {
+		return undefined;
+	}
 
 	const [firstElement, secondElement] = onlyArgument.elements;
-	/* v8 ignore next -- @preserve length was checked above; this only guards malformed AST tuples. */
-	if (firstElement === undefined || secondElement === undefined) return undefined;
-	if (firstElement === null || secondElement === null) return undefined;
-	if (isSpreadElement(firstElement) || isSpreadElement(secondElement)) return undefined;
+	/* v8 ignore next -- @preserve length was checked above; this only guards malformed AST tuples. @preserve */
+	if (
+		firstElement === undefined ||
+		secondElement === undefined ||
+		firstElement === null ||
+		secondElement === null ||
+		isSpreadElement(firstElement) ||
+		isSpreadElement(secondElement)
+	) {
+		return undefined;
+	}
 
 	const firstValue = getKeypointValue(firstElement, keypointName, 0);
 	const secondValue = getKeypointValue(secondElement, keypointName, 1);

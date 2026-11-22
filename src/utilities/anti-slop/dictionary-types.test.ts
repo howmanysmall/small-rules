@@ -196,12 +196,9 @@ describe("classifyUnsafeDictionary", () => {
 		);
 
 		expect(
-			classifyUnsafeDictionary(getNthNamedTypeReference(fixture.source, "Record", 0), fixture.environment)
-				?.unsafeValue,
+			classifyUnsafeDictionary(getNthRecordReference(fixture.source, 0), fixture.environment)?.unsafeValue,
 		).toBe("empty-object");
-		expect(
-			classifyUnsafeDictionary(getNthNamedTypeReference(fixture.source, "Record", 1), fixture.environment),
-		).toBeUndefined();
+		expect(classifyUnsafeDictionary(getNthRecordReference(fixture.source, 1), fixture.environment)).toBeUndefined();
 	});
 
 	it.for([
@@ -259,7 +256,7 @@ describe("classifyUnsafeDictionary", () => {
 			expect.assertions(1);
 
 			const fixture = setup(`type Source = Record<string, unknown>; type A = ${wrapper}<Source, never>;`);
-			const pickReference = getNthTypeReference(fixture.source, 1);
+			const pickReference = getSecondTypeReference(fixture.source);
 
 			expect(classifyUnsafeDictionary(pickReference, fixture.environment)).toBeDefined();
 		},
@@ -271,7 +268,7 @@ describe("classifyUnsafeDictionary", () => {
 		expect.assertions(1);
 
 		const fixture = setup("type Cycle = Cycle | unknown; type A = Record<string, Cycle>;");
-		const recordReference = getNthTypeReference(fixture.source, 1);
+		const recordReference = getSecondTypeReference(fixture.source);
 
 		expect(classifyUnsafeDictionary(recordReference, fixture.environment)).toStrictEqual({
 			kind: "unsafe-dictionary",
@@ -372,7 +369,7 @@ function findIdentifierReference(source: HarnessSourceCode, name: string): ESTre
 	return found;
 }
 
-function getNthTypeReference(source: HarnessSourceCode, index: number): ESTree.TSTypeReference {
+function getSecondTypeReference(source: HarnessSourceCode): ESTree.TSTypeReference {
 	const references = new Array<ESTree.TSTypeReference>();
 	traverseAst(source.ast, {
 		TSTypeReference(node: HarnessNode) {
@@ -381,9 +378,9 @@ function getNthTypeReference(source: HarnessSourceCode, index: number): ESTree.T
 			}
 		},
 	});
-	const reference = references[index];
+	const [, reference] = references;
 	if (reference === undefined) {
-		throw new Error(`Type reference at index ${index} not found.`);
+		throw new Error("Second type reference not found.");
 	}
 
 	return reference;
@@ -656,18 +653,14 @@ describe("classifyWideningTarget", () => {
 			].join("\n"),
 		);
 
-		expect(
-			classifyWideningTarget(getNthNamedTypeReference(fixture.source, "Record", 0), fixture.environment),
-		).toBeUndefined();
-		expect(
-			classifyWideningTarget(getNthNamedTypeReference(fixture.source, "Record", 1), fixture.environment),
-		).toBeUndefined();
-		expect(
-			classifyWideningTarget(getNthNamedTypeReference(fixture.source, "Record", 2), fixture.environment)?.kind,
-		).toBe("open dictionary");
-		expect(
-			classifyWideningTarget(getNthNamedTypeReference(fixture.source, "Record", 3), fixture.environment)?.kind,
-		).toBe("open dictionary");
+		expect(classifyWideningTarget(getNthRecordReference(fixture.source, 0), fixture.environment)).toBeUndefined();
+		expect(classifyWideningTarget(getNthRecordReference(fixture.source, 1), fixture.environment)).toBeUndefined();
+		expect(classifyWideningTarget(getNthRecordReference(fixture.source, 2), fixture.environment)?.kind).toBe(
+			"open dictionary",
+		);
+		expect(classifyWideningTarget(getNthRecordReference(fixture.source, 3), fixture.environment)?.kind).toBe(
+			"open dictionary",
+		);
 	});
 
 	it("suppresses built-in classification for a competing global Record binding", ({ expect }) => {
@@ -909,7 +902,7 @@ describe("classifyWideningTarget", () => {
 	});
 });
 
-function getNthNamedTypeReference(source: HarnessSourceCode, name: string, index: number): ESTree.TSTypeReference {
+function getNthRecordReference(source: HarnessSourceCode, index: number): ESTree.TSTypeReference {
 	const references = new Array<ESTree.TSTypeReference>();
 	traverseAst(source.ast, {
 		TSTypeReference(node: HarnessNode) {
@@ -917,7 +910,7 @@ function getNthNamedTypeReference(source: HarnessSourceCode, name: string, index
 				isNode(node) &&
 				node.type === "TSTypeReference" &&
 				node.typeName.type === "Identifier" &&
-				node.typeName.name === name
+				node.typeName.name === "Record"
 			) {
 				references.push(node);
 			}
@@ -927,5 +920,5 @@ function getNthNamedTypeReference(source: HarnessSourceCode, name: string, index
 	const reference = references[index];
 	if (reference !== undefined) return reference;
 
-	throw new Error(`Type reference "${name}" at index ${index} not found.`);
+	throw new Error(`Type reference "Record" at index ${index} not found.`);
 }

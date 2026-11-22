@@ -75,8 +75,8 @@ function createFileCandidates(filename: string): ReadonlyArray<string> {
 	return [normalizedFilename, relativeFilename];
 }
 
-function compileMatcher(pattern: string, options: MinimatchOptions): CompiledMatcher {
-	const matcher = new Minimatch(pattern, options);
+function compileMatcher(pattern: string): CompiledMatcher {
+	const matcher = new Minimatch(pattern, NAME_MATCH_OPTIONS);
 	const hasMagic = matcher.hasMagic();
 	return {
 		hasMagic,
@@ -90,7 +90,7 @@ function createPropertyMatcher(patterns: ReadonlyArray<string>): Matcher {
 	let size = 0;
 
 	for (const pattern of patterns) {
-		const matcher = compileMatcher(pattern, NAME_MATCH_OPTIONS);
+		const matcher = compileMatcher(pattern);
 		if (matcher.hasMagic) {
 			globMatchers[size++] = matcher.matches;
 		} else {
@@ -103,7 +103,7 @@ function createPropertyMatcher(patterns: ReadonlyArray<string>): Matcher {
 
 function compileRestriction(restriction: Restriction): CompiledRestriction {
 	return {
-		matchesObject: compileMatcher(restriction.object, NAME_MATCH_OPTIONS).matches,
+		matchesObject: compileMatcher(restriction.object).matches,
 		matchesProperty: createPropertyMatcher(restriction.properties),
 		message: restriction.message,
 	};

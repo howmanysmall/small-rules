@@ -502,8 +502,13 @@ function getVisibleSubstitution(
 	environment: TypeAliasEnvironment,
 ): Substitution | undefined {
 	const { owner, parameters } = resolution[resolutionContext].environment;
-	if (owner === undefined) return undefined;
-	if (getLexicalTypeParameterNames(resolution.type, environment.visitorKeys, owner).has(name)) return undefined;
+	if (
+		owner === undefined ||
+		getLexicalTypeParameterNames(resolution.type, environment.visitorKeys, owner).has(name)
+	) {
+		return undefined;
+	}
+
 	return parameters.get(name);
 }
 

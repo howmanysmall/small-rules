@@ -108,8 +108,16 @@ interface RawComment {
 }
 
 function isRawComment(value: unknown): value is RawComment {
-	if (typeof value !== "object" || value === null) return false;
-	if (!("type" in value) || !("value" in value) || !("start" in value) || !("end" in value)) return false;
+	if (
+		typeof value !== "object" ||
+		value === null ||
+		!("type" in value) ||
+		!("value" in value) ||
+		!("start" in value) ||
+		!("end" in value)
+	) {
+		return false;
+	}
 
 	return (
 		(value.type === "Block" || value.type === "Line") &&
