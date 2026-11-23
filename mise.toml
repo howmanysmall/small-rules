@@ -24,7 +24,7 @@ hk = { version = "2.13.0", workflow = "release.yml" }
 jactionlint = "latest"
 lychee = "latest"
 ni = "latest"
-node = "24"
+node = "26"
 pinact = "latest"
 pkl = "latest"
 pnpm = "12.23.0"
