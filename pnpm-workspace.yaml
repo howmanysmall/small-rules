@@ -302,7 +302,8 @@ permissions:
     skills: true
   fallow:
     skills: true
-
+  koffi:
+    build: true
   tsdown:
     skills: true
 
