@@ -151,7 +151,7 @@ catalogs:
   lint:
     "@biomejs/biome": 2.6.8
     "@e18e/eslint-plugin": 0.8.1
-    "@isentinel/eslint-config": 7.1.0
+    "@isentinel/eslint-config": 8.0.0
     "@stylistic/eslint-plugin": 6.0.1
     "@vitest/eslint-plugin": 1.6.28
     eslint: 10.15.0
