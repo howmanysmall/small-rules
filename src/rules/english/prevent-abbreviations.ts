@@ -185,8 +185,7 @@ function checkVariable(
 ): void {
 	const definitionName = definition.name;
 	/* v8 ignore next -- parser variable definitions in this rule expose identifier names. @preserve */
-	if (!isIdentifier(definitionName)) return;
-	if (shouldSkipVariable(definition, definitionName, options)) return;
+	if (!isIdentifier(definitionName) || shouldSkipVariable(definition, definitionName, options)) return;
 
 	const specialCaseReplacement = getSpecialCaseReplacement(variable);
 	const variableReplacements =

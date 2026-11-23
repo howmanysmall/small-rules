@@ -33,8 +33,13 @@ export function areEquivalentMemberExpressions(
 	areEquivalentObjects: MemberPartComparer<MemberObject>,
 	areEquivalentComputedProperties: MemberPartComparer<MemberProperty>,
 ): boolean {
-	if (left.computed !== right.computed || left.optional !== right.optional) return false;
-	if (!areEquivalentObjects(left.object, right.object, sourceCode)) return false;
+	if (
+		left.computed !== right.computed ||
+		left.optional !== right.optional ||
+		!areEquivalentObjects(left.object, right.object, sourceCode)
+	) {
+		return false;
+	}
 
 	return left.computed
 		? areEquivalentComputedProperties(left.property, right.property, sourceCode)

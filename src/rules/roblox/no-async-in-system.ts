@@ -196,8 +196,7 @@ function isMatchingConfiguration(
 	chainPath: ReadonlyArray<string>,
 	configuration: CallbackParameterConfiguration,
 ): boolean {
-	if (binding.source !== configuration.source) return false;
-	if (binding.imported !== configuration.imported) return false;
+	if (binding.source !== configuration.source || binding.imported !== configuration.imported) return false;
 	return arePathsEqual(chainPath, configuration.memberPath);
 }
 
@@ -548,9 +547,13 @@ function recordSystemFunction(node: CallbackFunction, state: SystemDiscoveryStat
 }
 
 function recordSystemDeclarator(node: ESTree.VariableDeclarator, state: SystemDiscoveryState): void {
-	if (!isIdentifier(node.id)) return;
-	if (!isRecognizedType(node.id.typeAnnotation, state.systemTypeNames)) return;
-	if (node.init === null) return;
+	if (
+		!isIdentifier(node.id) ||
+		!isRecognizedType(node.id.typeAnnotation, state.systemTypeNames) ||
+		node.init === null
+	) {
+		return;
+	}
 
 	if (isAnyFunction(node.init)) {
 		state.systemFunctions.add(node.init);
@@ -560,9 +563,14 @@ function recordSystemDeclarator(node: ESTree.VariableDeclarator, state: SystemDi
 }
 
 function recordSystemSatisfies(node: ESTree.Node, state: SystemDiscoveryState): void {
-	if (!isTsSatisfiesExpression(node)) return;
-	if (!isRecognizedType(node.typeAnnotation, state.systemTypeNames)) return;
-	if (!isObjectExpression(node.expression)) return;
+	if (
+		!isTsSatisfiesExpression(node) ||
+		!isRecognizedType(node.typeAnnotation, state.systemTypeNames) ||
+		!isObjectExpression(node.expression)
+	) {
+		return;
+	}
+
 	state.typedSystemObjects.push(node.expression);
 }
 

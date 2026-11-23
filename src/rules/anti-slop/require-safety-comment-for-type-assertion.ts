@@ -207,11 +207,9 @@ function hasCommentBeforeAncestors(
 			);
 		}
 
-		if (isProgram(current.parent)) return false;
-
 		// A comment above a statement or class member justifies the assertions
 		// written directly in it, not those nested in a block it contains.
-		if (isInStatementList(current)) return false;
+		if (isProgram(current.parent) || isInStatementList(current)) return false;
 		current = current.parent;
 	}
 }
@@ -227,8 +225,13 @@ function hasDisableCoveringAssertionLine(
 		if (parsed === undefined) continue;
 		if (!assertionSyntaxRange && parsed.kind !== OXLINT_DISABLE_NEXT_LINE) continue;
 		if (!disableKindCoversLine(parsed.kind, comment, position.line)) continue;
-		if (parsed.kind !== OXLINT_DISABLE) return true;
-		if (isBlockDisableOpenAt(disabledAreas, comment, suppressionRules, position)) return true;
+
+		if (
+			parsed.kind !== OXLINT_DISABLE ||
+			isBlockDisableOpenAt(disabledAreas, comment, suppressionRules, position)
+		) {
+			return true;
+		}
 	}
 
 	return false;
@@ -245,8 +248,13 @@ interface AssertionPolicy {
 
 function hasSafetyComment(sourceCode: SourceCode, node: TypeAssertion, policy: AssertionPolicy): boolean {
 	const { assertionSyntaxRange, pattern, suppressionRules } = policy;
-	if (hasCommentBeforeAncestors(sourceCode, node, (comment) => pattern.test(comment.value))) return true;
-	if (hasDisableCoveringAssertionLine(sourceCode, node, policy)) return true;
+	if (
+		hasCommentBeforeAncestors(sourceCode, node, (comment) => pattern.test(comment.value)) ||
+		hasDisableCoveringAssertionLine(sourceCode, node, policy)
+	) {
+		return true;
+	}
+
 	if (assertionSyntaxRange) return false;
 
 	return hasCommentBeforeAncestors(sourceCode, node, (comment) =>

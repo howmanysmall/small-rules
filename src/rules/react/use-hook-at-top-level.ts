@@ -249,8 +249,7 @@ const useHookAtTopLevel = createRule("use-hook-at-top-level", "react", {
 			"ArrowFunctionExpression:exit": handleFunctionExit,
 			CallExpression(node): void {
 				const hookName = getActiveHookName(node);
-				if (hookName === undefined) return;
-				if (shouldIgnoreHook(hookName, node)) return;
+				if (hookName === undefined || shouldIgnoreHook(hookName, node)) return;
 
 				const kind = functionKinds.at(-1);
 				if (kind === undefined || kind === "other") return;
@@ -277,9 +276,8 @@ const useHookAtTopLevel = createRule("use-hook-at-top-level", "react", {
 
 				const source = node.source.value;
 				for (const specifier of node.specifiers) {
-					if (!isImportSpecifier(specifier)) continue;
-					/* v8 ignore next -- @preserve ImportSpecifier imported names are identifiers for supported parser input. */
-					if (!isIdentifier(specifier.imported)) continue;
+					/* v8 ignore next -- @preserve ImportSpecifier imported names are identifiers for supported parser input. @preserve */
+					if (!isImportSpecifier(specifier) || !isIdentifier(specifier.imported)) continue;
 
 					if (isReactHookName(specifier.imported.name)) {
 						importSourceMap.set(specifier.local.name, source);

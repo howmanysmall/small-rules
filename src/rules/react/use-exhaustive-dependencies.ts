@@ -681,8 +681,8 @@ function isDefinitionInsideNode(definition: VariableDefinitionLike, node: ESTree
 	return false;
 }
 
-function shouldCaptureVariable(variable: undefined | Variable, node: ESTree.Node): boolean {
-	return variable?.defs.every((definition) => !isDefinitionInsideNode(definition, node)) ?? false;
+function shouldCaptureVariable(variable: Variable, node: ESTree.Node): boolean {
+	return variable.defs.every((definition) => !isDefinitionInsideNode(definition, node));
 }
 
 function getCaptureInfo(
@@ -741,11 +741,13 @@ function collectCaptures(node: ESTree.Node, sourceCode: SourceCode): ReadonlyArr
 		if (GLOBAL_BUILTINS.has(name) || isInTypePosition(current)) return;
 
 		const variable = resolveVariableInScope(name, sourceCode.getScope(current));
-		if (!shouldCaptureVariable(variable, node)) return;
-		/* v8 ignore next -- @preserve shouldCaptureVariable rejects unresolved scope variables. */
-		if (variable === undefined) return;
-
-		if (!isDeclaredInComponentBody(variable, node)) return;
+		if (
+			variable === undefined ||
+			!shouldCaptureVariable(variable, node) ||
+			!isDeclaredInComponentBody(variable, node)
+		) {
+			return;
+		}
 
 		const capture = getCaptureInfo(current, name, variable, sourceCode);
 		if (captures.some((existing) => arePathsRelated(existing.segments, capture.segments))) return;
@@ -1016,10 +1018,11 @@ function collectMissingCaptures(
 ): ReadonlyArray<CaptureInfo> {
 	const missingCaptures = new Array<CaptureInfo>();
 	for (const capture of getRequiredCaptures(captures, stableHooks)) {
-		/* v8 ignore next -- @preserve required captures are collected from identifier-rooted expressions. */
-		if (getRootIdentifierName(capture.node) === undefined) continue;
-
-		if (dependencies.some((dependency) => coversCapture(dependency, capture, resolveExpressionDependencies))) {
+		/* v8 ignore next -- @preserve required captures are collected from identifier-rooted expressions. @preserve */
+		if (
+			getRootIdentifierName(capture.node) === undefined ||
+			dependencies.some((dependency) => coversCapture(dependency, capture, resolveExpressionDependencies))
+		) {
 			continue;
 		}
 

@@ -520,8 +520,14 @@ const requirePairedCalls = createRule("require-paired-calls", "general", {
 		): void {
 			for (const opener of openers) {
 				const branchesWithOpener = getBranchesWithOpener(opener, branches);
-				if (branchesWithOpener.length <= 0 || branchesWithOpener.length >= branches.length) continue;
-				if (resolvedOptions.allowConditionalClosers !== false) continue;
+				if (
+					branchesWithOpener.length <= 0 ||
+					branchesWithOpener.length >= branches.length ||
+					resolvedOptions.allowConditionalClosers !== false
+				) {
+					continue;
+				}
+
 				reportUnpairedEntry(opener, paths);
 			}
 		}

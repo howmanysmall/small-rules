@@ -110,11 +110,12 @@ function getCharacterType(characterCode?: number): number {
 }
 
 function shouldSplitIdentifier(previousType: number, currentType: number, nextType: number): boolean {
-	if (previousType === CHARACTER_TYPE_OTHER || currentType === CHARACTER_TYPE_OTHER) {
-		return previousType !== currentType;
-	}
-
-	if (previousType === CHARACTER_TYPE_DIGIT || currentType === CHARACTER_TYPE_DIGIT) {
+	if (
+		previousType === CHARACTER_TYPE_OTHER ||
+		currentType === CHARACTER_TYPE_OTHER ||
+		previousType === CHARACTER_TYPE_DIGIT ||
+		currentType === CHARACTER_TYPE_DIGIT
+	) {
 		return previousType !== currentType;
 	}
 
@@ -284,9 +285,9 @@ function isWordIgnored(word: string, configuration: ShorthandConfig): boolean {
 	return false;
 }
 
-function normalizeImportCheckOption(value: RawOptionValue, defaultValue: ImportCheckOption): ImportCheckOption {
+function normalizeImportCheckOption(value: RawOptionValue): ImportCheckOption {
 	if (value === "internal" || Predicate.isBoolean(value)) return value;
-	return defaultValue;
+	return "internal";
 }
 
 function normalizeBooleanRecord(value: RawOptions["allowList"]): Record<string, boolean> | undefined {
@@ -447,13 +448,10 @@ function createPreparedOptions(options?: RawOptions): PreparedOptions {
 	return {
 		allowList: normalizeAllowList(normalizedOptions),
 		allowPropertyAccess: normalizeAllowPropertyAccess(normalizedOptions),
-		checkDefaultAndNamespaceImports: normalizeImportCheckOption(
-			normalizedOptions?.checkDefaultAndNamespaceImports,
-			"internal",
-		),
+		checkDefaultAndNamespaceImports: normalizeImportCheckOption(normalizedOptions?.checkDefaultAndNamespaceImports),
 		checkFilenames: normalizeBooleanOption(normalizedOptions?.checkFilenames, true),
 		checkProperties: normalizeBooleanOption(normalizedOptions?.checkProperties, false),
-		checkShorthandImports: normalizeImportCheckOption(normalizedOptions?.checkShorthandImports, "internal"),
+		checkShorthandImports: normalizeImportCheckOption(normalizedOptions?.checkShorthandImports),
 		checkShorthandProperties: normalizeBooleanOption(normalizedOptions?.checkShorthandProperties, true),
 		checkVariables: normalizeBooleanOption(normalizedOptions?.checkVariables, true),
 		ignore: normalizeIgnorePatterns(normalizedOptions),

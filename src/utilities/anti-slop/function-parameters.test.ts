@@ -115,10 +115,10 @@ interface HasParameters {
 	readonly params: ReadonlyArray<ESTree.ParamPattern>;
 }
 
-function requireParameter(owner: HasParameters, index: number): ESTree.ParamPattern {
-	const parameter = owner.params[index];
+function requireFirstParameter(owner: HasParameters): ESTree.ParamPattern {
+	const [parameter] = owner.params;
 	if (parameter === undefined) {
-		throw new Error(`Expected parameter at index ${index}.`);
+		throw new Error("Expected a first parameter.");
 	}
 
 	return parameter;
@@ -134,7 +134,7 @@ describe("getFunctionParameterTypeAnnotation", () => {
 		expect.assertions(1);
 
 		const source = parseCode(code);
-		const parameter = requireParameter(findFirstFunction(source), 0);
+		const parameter = requireFirstParameter(findFirstFunction(source));
 
 		expect(getFunctionParameterTypeAnnotation(parameter)?.typeAnnotation.type).toBe(expectedType);
 	});
@@ -147,7 +147,7 @@ describe("getFunctionParameterTypeAnnotation", () => {
 		expect.assertions(1);
 
 		const source = parseCode(code);
-		const parameter = requireParameter(findFirstFunction(source), 0);
+		const parameter = requireFirstParameter(findFirstFunction(source));
 
 		expect(getFunctionParameterTypeAnnotation(parameter)).toBeUndefined();
 	});
@@ -165,7 +165,7 @@ describe("getFunctionParameterTypeAnnotation", () => {
 		expect.assertions(1);
 
 		const source = parseCode("const f = (value: string) => {};");
-		const parameter = requireParameter(findFirstArrow(source), 0);
+		const parameter = requireFirstParameter(findFirstArrow(source));
 
 		expect(getFunctionParameterTypeAnnotation(parameter)?.typeAnnotation.type).toBe("TSStringKeyword");
 	});
@@ -174,7 +174,7 @@ describe("getFunctionParameterTypeAnnotation", () => {
 		expect.assertions(1);
 
 		const source = parseCode("type F = (value: string) => void;");
-		const parameter = requireParameter(findFirstTSFunctionType(source), 0);
+		const parameter = requireFirstParameter(findFirstTSFunctionType(source));
 
 		expect(getFunctionParameterTypeAnnotation(parameter)?.typeAnnotation.type).toBe("TSStringKeyword");
 	});
@@ -190,7 +190,7 @@ describe("unwrapFunctionParameter", () => {
 		expect.assertions(1);
 
 		const source = parseCode(code);
-		const parameter = requireParameter(findFirstFunction(source), 0);
+		const parameter = requireFirstParameter(findFirstFunction(source));
 
 		expect(unwrapFunctionParameter(parameter).type).toBe(expectedType);
 	});
@@ -217,7 +217,7 @@ describe("getFunctionParameterBindingName", () => {
 		expect.assertions(1);
 
 		const source = parseCode(code);
-		const parameter = requireParameter(findFirstFunction(source), 0);
+		const parameter = requireFirstParameter(findFirstFunction(source));
 
 		expect(getFunctionParameterBindingName(parameter, source)).toBe(expected);
 	});

@@ -119,13 +119,8 @@ function isReportableNullLiteral(current: ESTree.Node): boolean {
 }
 
 function analyzeComponentBody(node: ESTree.Node, stateHooks: ReadonlySet<string>): BodyAnalysis {
-	/* v8 ignore next -- callers only analyze function-like component nodes. @preserve */
-	if (!isAnyFunction(node)) {
-		return { maxJsxDepth: 0, nullLiterals: [], stateHookCount: 0 };
-	}
-
-	/* v8 ignore next 3 -- @preserve implemented function nodes in this visitor have parser bodies. */
-	if (node.body === null) {
+	/* v8 ignore next 3 -- callers only analyze function-like component nodes, and implemented function nodes in this visitor have parser bodies. @preserve */
+	if (!isAnyFunction(node) || node.body === null) {
 		return { maxJsxDepth: 0, nullLiterals: [], stateHookCount: 0 };
 	}
 

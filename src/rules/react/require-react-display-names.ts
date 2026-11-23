@@ -104,8 +104,7 @@ function isExportedTrackedVariable(
 	node: ESTree.VariableDeclarator,
 	defaultExportedNames: ReadonlySet<string>,
 ): boolean {
-	if (defaultExportedNames.has(variableName)) return true;
-	if (isVariableDeclarationExported(node)) return true;
+	if (defaultExportedNames.has(variableName) || isVariableDeclarationExported(node)) return true;
 	return hasExportReference(sourceCode, node, variableName);
 }
 
@@ -198,9 +197,8 @@ const requireReactDisplayNames = createRule("require-react-display-names", "reac
 			},
 			"Program:exit"(): void {
 				for (const [variableName, trackedVariable] of trackedVariables) {
-					if (trackedVariable.hasDisplayName) continue;
-
 					if (
+						trackedVariable.hasDisplayName ||
 						!isExportedTrackedVariable(
 							context.sourceCode,
 							variableName,

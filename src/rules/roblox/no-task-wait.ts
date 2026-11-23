@@ -26,9 +26,13 @@ const noTaskWait = createRule("no-task-wait", "roblox", {
 				}
 
 				const { callee } = node;
-				if (!isMemberExpression(callee)) return;
-				if (!isIdentifierNamed(callee.object, "task")) return;
-				if (getMemberPropertyName(callee) !== "wait") return;
+				if (
+					!isMemberExpression(callee) ||
+					!isIdentifierNamed(callee.object, "task") ||
+					getMemberPropertyName(callee) !== "wait"
+				) {
+					return;
+				}
 
 				context.report({ messageId: "noTaskWait", node });
 			},

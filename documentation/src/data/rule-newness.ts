@@ -60,8 +60,9 @@ const COMMIT_MARKER = "__COMMIT__";
  * @returns First non-empty line, or undefined.
  */
 function getFirstLine(output: string): string | undefined {
-	const line = output.split("\n", 1)[0]?.trim();
-	return line === undefined || line.length === 0 ? undefined : line;
+	const newlineIndex = output.indexOf("\n");
+	const line = (newlineIndex === -1 ? output : output.slice(0, newlineIndex)).trim();
+	return line.length === 0 ? undefined : line;
 }
 
 /**

@@ -129,8 +129,12 @@ const noStaticReactCreateElement = createRule("no-static-react-create-element", 
 				if (!isReactImportedCall(sourceCode, node, CREATE_ELEMENT_NAMES, reactSources)) return;
 
 				const [elementArgument] = node.arguments;
-				if (elementArgument === undefined) return;
-				if (!isStaticElementArgument(sourceCode, elementArgument, reactSources)) return;
+				if (
+					elementArgument === undefined ||
+					!isStaticElementArgument(sourceCode, elementArgument, reactSources)
+				) {
+					return;
+				}
 
 				context.report({
 					messageId: "useJsx",

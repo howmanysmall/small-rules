@@ -157,8 +157,13 @@ function isReportableUsageElement(
 	filename: string,
 ): boolean {
 	const componentName = getJSXElementName(usage);
-	if (componentName === undefined) return false;
-	if (!isProtectedComponentUsage(componentName, protectedComponents, moduleScope, filename)) return false;
+	if (
+		componentName === undefined ||
+		!isProtectedComponentUsage(componentName, protectedComponents, moduleScope, filename)
+	) {
+		return false;
+	}
+
 	return !hasScaledFalseAttribute(usage);
 }
 

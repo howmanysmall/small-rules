@@ -164,7 +164,7 @@ function Component({ flag }) {
 				errors: [{ messageId: "preferTernaryConditionalRendering" }],
 			},
 			{
-				code: "export const a = (isOn) => <>{isOn && <b>on</b>} {!isOn && <i>off</i>}</>;",
+				code: "export const a = (isOn) => <>{isOn && <b>on</b>}\u{A0}{!isOn && <i>off</i>}</>;",
 				output: null,
 				errors: [{ messageId: "preferTernaryConditionalRendering" }],
 			},

@@ -81,17 +81,11 @@ function escapeRegExp(value: string): string {
 export const MAX_REGEX_CACHE_SIZE = 64;
 const regexCache = new Map<string, RegExp>();
 
-function ensureUnicodeFlag(flags: string): string {
-	/* v8 ignore next -- @preserve callers pass freshly-created search regex flags without unicode flags. */
-	return flags.includes("u") || flags.includes("v") ? flags : `${flags}u`;
-}
-
-function getCachedRegex(pattern: string, flags: string): RegExp {
-	const cacheKey = `${flags}:${pattern}`;
-	const cached = regexCache.get(cacheKey);
+function getCachedRegex(pattern: string): RegExp {
+	const cached = regexCache.get(pattern);
 	if (cached !== undefined) return cached;
 
-	const regex = new RegExp(pattern, ensureUnicodeFlag(flags));
+	const regex = new RegExp(pattern, "u");
 
 	if (regexCache.size >= MAX_REGEX_CACHE_SIZE) {
 		const firstKey = regexCache.keys().next().value;
@@ -101,7 +95,7 @@ function getCachedRegex(pattern: string, flags: string): RegExp {
 		}
 	}
 
-	regexCache.set(cacheKey, regex);
+	regexCache.set(pattern, regex);
 	return regex;
 }
 
@@ -121,19 +115,19 @@ function getFileText(filePath: string): string {
 function getImportStyle(text: string, componentName: string): "default" | "named" | undefined {
 	const escapedName = escapeRegExp(componentName);
 	const hasNamedExport =
-		getCachedRegex(`\\bexport\\s+(?:const|function|class)\\s+${escapedName}\\b`, "u").test(text) ||
-		getCachedRegex(`\\bexport\\s*\\{[^}]*\\b${escapedName}\\b[^}]*\\}`, "u").test(text);
+		getCachedRegex(`\\bexport\\s+(?:const|function|class)\\s+${escapedName}\\b`).test(text) ||
+		getCachedRegex(`\\bexport\\s*\\{[^}]*\\b${escapedName}\\b[^}]*\\}`).test(text);
 
 	if (hasNamedExport) return "named";
 
-	return DEFAULT_EXPORT_PATTERN.test(text) && getCachedRegex(`\\b${escapedName}\\b`, "u").test(text)
+	return DEFAULT_EXPORT_PATTERN.test(text) && getCachedRegex(`\\b${escapedName}\\b`).test(text)
 		? "default"
 		: undefined;
 }
 
 function hasExpectedMarkers(text: string, markers: ReadonlyArray<string>): boolean {
 	for (const marker of markers) {
-		if (!getCachedRegex(`\\b${escapeRegExp(marker)}\\b`, "u").test(text)) return false;
+		if (!getCachedRegex(`\\b${escapeRegExp(marker)}\\b`).test(text)) return false;
 	}
 
 	return true;
@@ -328,7 +322,7 @@ export function inspectLocalComponentFile(
 	}
 
 	const text = getFileText(filePath);
-	if (!getCachedRegex(`\\b${escapeRegExp(definition.componentName)}\\b`, "u").test(text)) {
+	if (!getCachedRegex(`\\b${escapeRegExp(definition.componentName)}\\b`).test(text)) {
 		return { importStyle: undefined, matches: false };
 	}
 

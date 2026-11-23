@@ -500,8 +500,9 @@ function copyGraphemes(previousString: string, nextString: string): string {
 }
 
 export function copy(previousString: string, nextString: string): string {
-	if (previousString.length === 0 || nextString.length === 0) return nextString;
-	if (previousString.length !== nextString.length) return nextString;
+	if (previousString.length === 0 || nextString.length === 0 || previousString.length !== nextString.length) {
+		return nextString;
+	}
 
 	let result = "";
 	for (let index = 0; index < previousString.length; index += 1) {

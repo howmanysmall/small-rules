@@ -11,9 +11,14 @@ const NARROWING_FLAGS = new Set(["--changed", "--project", "--related", "--shard
 const TEST_FILE_ARGUMENT = /\.(?:fuzz|test)\.[cm]?tsx?$/u;
 const TEST_ROOTS = ["documentation/", "scripts/", "src/", "tests/"];
 
+function getFlagName(argument: string): string {
+	const equalsIndex = argument.indexOf("=");
+	return equalsIndex === -1 ? argument : argument.slice(0, equalsIndex);
+}
+
 function isFocusedRun(cliArguments: ReadonlyArray<string>): boolean {
 	return cliArguments.some((argument) => {
-		if (argument.startsWith("-")) return NARROWING_FLAGS.has(argument.split("=", 1)[0] ?? argument);
+		if (argument.startsWith("-")) return NARROWING_FLAGS.has(getFlagName(argument));
 
 		return TEST_ROOTS.some((root) => argument.startsWith(root)) || TEST_FILE_ARGUMENT.test(argument);
 	});

@@ -458,8 +458,13 @@ const requireReactComponentKeys = createRule("require-react-component-keys", "re
 				return;
 			}
 
-			if (isIgnoredCallExpression(node, ignoredCallExpressions)) return;
-			if (isExemptElement(node) || shouldSkipFragment(node, callbackUsage)) return;
+			if (
+				isIgnoredCallExpression(node, ignoredCallExpressions) ||
+				isExemptElement(node) ||
+				shouldSkipFragment(node, callbackUsage)
+			) {
+				return;
+			}
 
 			if (isJsxFragment(node)) {
 				context.report({

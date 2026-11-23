@@ -20,12 +20,18 @@ interface ComponentDetails {
 }
 
 function getComponentDeclarationDetails(node: ESTree.Node): ComponentDetails | undefined {
-	if (!isFunctionDeclaration(node) || !isComponentDeclaration(node) || node.id === null || node.body === null) {
+	/* v8 ignore next -- FunctionDeclaration ids are parser-produced identifiers after the null guard. @preserve */
+	if (
+		!isFunctionDeclaration(node) ||
+		!isComponentDeclaration(node) ||
+		node.id === null ||
+		node.body === null ||
+		!isNode(node.id) ||
+		!("name" in node.id) ||
+		!Predicate.isString(node.id.name)
+	) {
 		return undefined;
 	}
-
-	/* v8 ignore next -- FunctionDeclaration ids are parser-produced identifiers after the null guard. @preserve */
-	if (!isNode(node.id) || !("name" in node.id) || !Predicate.isString(node.id.name)) return undefined;
 
 	return { name: node.id.name, body: node.body, nameNode: node.id };
 }

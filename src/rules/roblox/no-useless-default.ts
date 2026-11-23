@@ -751,8 +751,7 @@ function clearTrackedInstancesForCallExpression(
 ): void {
 	for (const [identifierName] of trackedInstances) {
 		for (const argument of callExpression.arguments) {
-			if (isSpreadElement(argument)) continue;
-			if (!containsIdentifierReference(argument, identifierName)) continue;
+			if (isSpreadElement(argument) || !containsIdentifierReference(argument, identifierName)) continue;
 
 			trackedInstances.delete(identifierName);
 			break;
@@ -870,10 +869,14 @@ const noUselessDefault = createRule("no-useless-default", "roblox", {
 			if (node.attributes.some(isJsxSpreadAttribute)) return undefined;
 
 			const previousToken = sourceCode.getTokenBefore(attribute);
-			/* v8 ignore next -- @preserve JSX attributes always have a preceding token in their opening element. */
-			if (previousToken === null || hasCommentsAroundNode(attribute)) return undefined;
-			/* v8 ignore next -- @preserve SourceCode reports adjacent JSX comments through getCommentsBefore before this defensive token-between check. */
-			if (sourceCode.commentsExistBetween(previousToken, attribute)) return undefined;
+			/* v8 ignore next -- JSX attributes always have a preceding token in their opening element, and SourceCode reports adjacent JSX comments through getCommentsBefore before this defensive token-between check. @preserve */
+			if (
+				previousToken === null ||
+				hasCommentsAroundNode(attribute) ||
+				sourceCode.commentsExistBetween(previousToken, attribute)
+			) {
+				return undefined;
+			}
 
 			const nextToken = sourceCode.getTokenAfter(attribute);
 			/* v8 ignore next -- @preserve SourceCode reports adjacent JSX comments through getCommentsAfter before this defensive token-between check. */

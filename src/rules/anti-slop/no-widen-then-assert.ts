@@ -253,16 +253,21 @@ function getKnownAnnotationEvidence(
 ): KnownValueEvidence | undefined {
 	const annotation = identifier.typeAnnotation?.typeAnnotation;
 	/* v8 ignore next -- Callers select only identifiers with an annotation. @preserve */
-	if (annotation === undefined) return undefined;
-	if (getFunctionBoundary(identifier) !== boundary || getBroadTypeKind(annotation) !== undefined) return undefined;
+	if (
+		annotation === undefined ||
+		getFunctionBoundary(identifier) !== boundary ||
+		getBroadTypeKind(annotation) !== undefined
+	) {
+		return undefined;
+	}
+
 	return { type: annotation };
 }
 
 function getKnownInitializer(variable: ScopeVariable, boundary?: ESTree.Node): ESTree.Expression | undefined {
 	const declarator = variableDeclarator(variable);
-	if (declarator === undefined) return undefined;
-
 	if (
+		declarator === undefined ||
 		!isVariableDeclaration(declarator.parent) ||
 		declarator.parent.kind !== "const" ||
 		declarator.init === null ||

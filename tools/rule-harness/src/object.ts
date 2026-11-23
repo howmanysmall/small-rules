@@ -25,8 +25,7 @@ export function getObjectProperty(value: HarnessValue, key: string): undefined |
 }
 
 export function isJsonSerializable(value: HarnessValue): boolean {
-	if (value === null) return true;
-	if (Predicate.isString(value) || Predicate.isBoolean(value)) return true;
+	if (value === null || Predicate.isString(value) || Predicate.isBoolean(value)) return true;
 	if (Predicate.isNumber(value)) return Number.isFinite(value);
 	if (Array.isArray(value)) return value.every(isJsonSerializable);
 	if (!Predicate.isObject(value)) return false;

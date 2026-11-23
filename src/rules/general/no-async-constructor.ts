@@ -40,8 +40,15 @@ function getAsyncMethodNames(classBody: ESTree.ClassBody): ReadonlySet<string> {
 	const asyncMethods = new Set<string>();
 
 	for (const element of classBody.body) {
-		if (!isMethodDefinition(element) || element.kind !== "method" || !element.value.async) continue;
-		if (!isIdentifier(element.key)) continue;
+		if (
+			!isMethodDefinition(element) ||
+			element.kind !== "method" ||
+			!element.value.async ||
+			!isIdentifier(element.key)
+		) {
+			continue;
+		}
+
 		asyncMethods.add(element.key.name);
 	}
 

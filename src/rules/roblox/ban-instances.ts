@@ -74,10 +74,8 @@ function normalizePropertyBans(
 ): Map<string, ReadonlyMap<string, BannedPropertyEntry>> {
 	const bannedClasses = new Map<string, ReadonlyMap<string, BannedPropertyEntry>>();
 
-	if (rawBans === undefined) return bannedClasses;
-
-	/* v8 ignore next -- @preserve rule schema rejects non-record bannedProperties. */
-	if (!Predicate.isObject(rawBans)) return bannedClasses;
+	/* v8 ignore next -- @preserve rule schema rejects non-record bannedProperties. @preserve */
+	if (rawBans === undefined || !Predicate.isObject(rawBans)) return bannedClasses;
 
 	for (const [className, propertyConfig] of Object.entries(rawBans)) {
 		/* v8 ignore next -- @preserve rule schema rejects non-record bannedProperties entries. */

@@ -21,8 +21,15 @@ function isRecord(value: unknown): value is JsonObject {
 }
 
 function parseClass(value: unknown): RobloxClass | undefined {
-	if (!isRecord(value) || !Predicate.isString(value.Name) || !Predicate.isString(value.Superclass)) return undefined;
-	if (!Array.isArray(value.Members)) return undefined;
+	if (
+		!isRecord(value) ||
+		!Predicate.isString(value.Name) ||
+		!Predicate.isString(value.Superclass) ||
+		!Array.isArray(value.Members)
+	) {
+		return undefined;
+	}
+
 	return { name: value.Name, members: value.Members, superclass: value.Superclass };
 }
 

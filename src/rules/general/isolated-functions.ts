@@ -105,8 +105,15 @@ function getObjectPropertyName(node: ESTree.Node): string | undefined {
 }
 
 function isMethodCallNamed(node: ESTree.CallExpression, objectName: string, methodName: string): boolean {
-	if (!isMemberExpression(node.callee) || node.callee.computed || node.callee.optional) return false;
-	if (!isIdentifierNamed(node.callee.object, objectName)) return false;
+	if (
+		!isMemberExpression(node.callee) ||
+		node.callee.computed ||
+		node.callee.optional ||
+		!isIdentifierNamed(node.callee.object, objectName)
+	) {
+		return false;
+	}
+
 	return getMemberPropertyName(node.callee) === methodName;
 }
 
@@ -119,12 +126,27 @@ function getDefaultArgumentCallReason(node: ESTree.Node): string | undefined {
 }
 
 function getScriptingObjectName(call: ESTree.CallExpression): string | undefined {
-	if (!isMemberExpression(call.callee) || call.callee.computed || call.callee.optional) return undefined;
-	if (getMemberPropertyName(call.callee) !== "executeScript") return undefined;
+	if (
+		!isMemberExpression(call.callee) ||
+		call.callee.computed ||
+		call.callee.optional ||
+		getMemberPropertyName(call.callee) !== "executeScript"
+	) {
+		return undefined;
+	}
+
 	const scripting = call.callee.object;
-	if (!isMemberExpression(scripting) || scripting.computed || scripting.optional) return undefined;
-	if (getMemberPropertyName(scripting) !== "scripting") return undefined;
-	if (!isIdentifier(scripting.object) || !SCRIPTING_OBJECTS.has(scripting.object.name)) return undefined;
+	if (
+		!isMemberExpression(scripting) ||
+		scripting.computed ||
+		scripting.optional ||
+		getMemberPropertyName(scripting) !== "scripting" ||
+		!isIdentifier(scripting.object) ||
+		!SCRIPTING_OBJECTS.has(scripting.object.name)
+	) {
+		return undefined;
+	}
+
 	return scripting.object.name;
 }
 
@@ -161,8 +183,15 @@ function isCallArgument(call: ESTree.CallExpression, node: ESTree.Node): boolean
 function getConfiguredFunctionReason(node: ESTree.Node, functions: ReadonlySet<string>): string | undefined {
 	if (functions.size === 0) return undefined;
 	const { parent } = node;
-	if (!isCallExpression(parent) || !isCallArgument(parent, node)) return undefined;
-	if (!isIdentifier(parent.callee) || !functions.has(parent.callee.name)) return undefined;
+	if (
+		!isCallExpression(parent) ||
+		!isCallArgument(parent, node) ||
+		!isIdentifier(parent.callee) ||
+		!functions.has(parent.callee.name)
+	) {
+		return undefined;
+	}
+
 	return `callee of function named ${JSON.stringify(parent.callee.name)}`;
 }
 
@@ -292,8 +321,7 @@ function reportExternalReferences(context: Context, node: FunctionNode, reason: 
 		let problemReason = reason;
 
 		if (allowedGlobal !== undefined && allowedGlobal !== "off") {
-			if (reference.isReadOnly()) continue;
-			if (allowedGlobal === "writable") continue;
+			if (allowedGlobal === "writable" || reference.isReadOnly()) continue;
 			problemReason = `${reason} (global variable is not writable)`;
 		}
 

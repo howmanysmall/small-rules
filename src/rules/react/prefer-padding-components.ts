@@ -63,11 +63,8 @@ function areStructurallyEqual(left: StructuralValue, right: StructuralValue): bo
 	if (Object.is(left, right)) return true;
 	if (isStructuralArray(left)) return Array.isArray(right) && areArraysStructurallyEqual(left, right);
 
-	/* v8 ignore next -- parser-produced ESTree nodes are records, not native arrays. @preserve */
-	if (Array.isArray(right)) return false;
-
-	/* v8 ignore next -- comparable JSX values are parser-produced record-shaped ESTree nodes. @preserve */
-	if (!isStructuralRecord(left) || !isStructuralRecord(right)) return false;
+	/* v8 ignore next -- parser-produced ESTree nodes are records, not native arrays; comparable JSX values are record-shaped. @preserve */
+	if (Array.isArray(right) || !isStructuralRecord(left) || !isStructuralRecord(right)) return false;
 
 	return areRecordsStructurallyEqual(left, right);
 }
@@ -97,8 +94,7 @@ function areRecordsStructurallyEqual(left: StructuralRecord, right: StructuralRe
 
 	for (const [key, value] of leftEntries) {
 		/* v8 ignore next -- parser nodes of the same type share required structural keys. @preserve */
-		if (!(key in right)) return false;
-		if (!areStructurallyEqual(value, right[key])) return false;
+		if (!(key in right) || !areStructurallyEqual(value, right[key])) return false;
 	}
 
 	return true;

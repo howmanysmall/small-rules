@@ -340,11 +340,16 @@ function isAssignedToModuleConst(context: Context, node: JavaScriptXmlNode): boo
 		parent = nextParent;
 	}
 
-	if (!isVariableDeclarator(parent) || !isIdentifier(parent.id) || parent.init !== current) return false;
-
 	/* v8 ignore next -- @preserve VariableDeclarator nodes are parented by VariableDeclaration nodes. */
-	if (!isVariableDeclaration(parent.parent)) return false;
-	if (parent.parent.kind !== "const") return false;
+	if (
+		!isVariableDeclarator(parent) ||
+		!isIdentifier(parent.id) ||
+		parent.init !== current ||
+		!isVariableDeclaration(parent.parent) ||
+		parent.parent.kind !== "const"
+	) {
+		return false;
+	}
 
 	const variable = getVariableByName(context.sourceCode.getScope(current), parent.id.name);
 	return variable !== undefined && isModuleLevelScope(variable.scope);
@@ -374,14 +379,19 @@ const preferHoistedJsxElements = createRule("prefer-hoisted-jsx-elements", "reac
 
 		function checkJavaScriptXmlNode(node: JavaScriptXmlNode): void {
 			if (
-				!isStaticJavaScriptXmlNode(context, node, new Set(), additionalComponents, staticOptions, environment)
+				!isStaticJavaScriptXmlNode(
+					context,
+					node,
+					new Set(),
+					additionalComponents,
+					staticOptions,
+					environment,
+				) ||
+				isAssignedToModuleConst(context, node) ||
+				hasStaticJavaScriptXmlAncestor(context, node, additionalComponents, staticOptions, environment)
 			) {
 				return;
 			}
-
-			if (isAssignedToModuleConst(context, node)) return;
-
-			if (hasStaticJavaScriptXmlAncestor(context, node, additionalComponents, staticOptions, environment)) return;
 
 			reportHoistableJavaScriptXmlNode(context, node);
 		}

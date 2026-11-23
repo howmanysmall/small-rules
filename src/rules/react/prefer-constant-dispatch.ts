@@ -85,9 +85,14 @@ function isConstantDispatchValue(sourceCode: SourceCode, expression: ESTree.Expr
 
 function shouldReportActionObject(sourceCode: SourceCode, objectExpression: ESTree.ObjectExpression): boolean {
 	for (const property of objectExpression.properties) {
-		if (!isProperty(property)) return false;
-		if (property.kind !== "init" || property.computed) return false;
-		if (!isConstantDispatchValue(sourceCode, property.value)) return false;
+		if (
+			!isProperty(property) ||
+			property.kind !== "init" ||
+			property.computed ||
+			!isConstantDispatchValue(sourceCode, property.value)
+		) {
+			return false;
+		}
 	}
 
 	return true;
@@ -97,14 +102,17 @@ function getTrackedDispatchVariable(
 	sourceCode: SourceCode,
 	variableDeclarator: ESTree.VariableDeclarator,
 ): ScopeVariable | undefined {
-	if (!isArrayPattern(variableDeclarator.id)) return undefined;
-	if (!isCallExpression(variableDeclarator.init)) return undefined;
-	if (getHookName(variableDeclarator.init) !== "useReducer") return undefined;
+	if (
+		!isArrayPattern(variableDeclarator.id) ||
+		!isCallExpression(variableDeclarator.init) ||
+		getHookName(variableDeclarator.init) !== "useReducer"
+	) {
+		return undefined;
+	}
 
 	// oxlint-disable-next-line prefer-destructuring -- ugly.
 	const dispatchElement = variableDeclarator.id.elements[1];
-	if (dispatchElement === undefined || dispatchElement === null) return undefined;
-	if (!isIdentifier(dispatchElement)) return undefined;
+	if (dispatchElement === undefined || dispatchElement === null || !isIdentifier(dispatchElement)) return undefined;
 
 	return getVariableByName(sourceCode.getScope(dispatchElement), dispatchElement.name);
 }

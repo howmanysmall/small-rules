@@ -45,8 +45,10 @@ export function isExpressionSideEffectSafe(expression: ESTree.Expression): boole
 }
 
 function isMemberSideEffectSafe(expression: ESTree.MemberExpression): boolean {
-	if (expression.optional || isSuper(expression.object)) return false;
-	if (!isExpressionSideEffectSafe(expression.object)) return false;
+	if (expression.optional || isSuper(expression.object) || !isExpressionSideEffectSafe(expression.object)) {
+		return false;
+	}
+
 	return !expression.computed || isExpressionSideEffectSafe(expression.property);
 }
 

@@ -78,8 +78,9 @@ const preferLocalPortalComponent = createRule("prefer-local-portal-component", "
 
 		return {
 			CallExpression(node): void {
-				if (isPortalDefinitionFile) return;
-				if (!isPortalFactoryCall(sourceCode, node) || node.arguments.length !== 2) return;
+				if (isPortalDefinitionFile || !isPortalFactoryCall(sourceCode, node) || node.arguments.length !== 2) {
+					return;
+				}
 
 				const hasAvailablePortal = availablePortalIdentifiers.size > 0 || discoverPortal().found;
 				if (!hasAvailablePortal) return;
