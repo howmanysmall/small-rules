@@ -263,8 +263,8 @@ catalogs:
       specifier: 4.6.0
       version: 4.6.0
     simple-icons:
-      specifier: 16.38.0
-      version: 16.38.0
+      specifier: 16.38.1
+      version: 16.38.1
   lint:
     '@biomejs/biome':
       specifier: 2.6.8
@@ -367,8 +367,8 @@ catalogs:
       specifier: 2.4.1
       version: 2.4.1
     '@opencode/schema':
-      specifier: 2.3.2
-      version: 2.3.2
+      specifier: 2.4.1
+      version: 2.4.1
     effect:
       specifier: 4.1.0
       version: 4.1.0
@@ -536,8 +536,8 @@ catalogs:
       specifier: 1.9.0
       version: 1.9.0
     tsrs:
-      specifier: 7.1.0-beta.tsrs4
-      version: 7.1.0-beta.tsrs4
+      specifier: 7.1.0-beta.tsrs5
+      version: 7.1.0-beta.tsrs5
     turbo:
       specifier: 2.11.13
       version: 2.11.13
@@ -654,7 +654,7 @@ importers:
         version: link:tools/lint-configurations
       '@isentinel/eslint-config':
         specifier: catalog:lint
-        version: 7.1.0(patch_hash=1b233ac4095531c7d06d8c3fa70e322add76bfb16cbf1bc584644ad3cd4b7224)(1aac7f0a98d85ce30295778fe7601fd0)
+        version: 7.1.0(patch_hash=1b233ac4095531c7d06d8c3fa70e322add76bfb16cbf1bc584644ad3cd4b7224)(abf38b25b2eff324ca58644d194df166)
       '@isentinel/hooks':
         specifier: catalog:tooling
         version: 1.7.0(@typescript/typescript6@6.0.2)(jiti@2.7.0)(supports-color@10.2.2)
@@ -822,10 +822,10 @@ importers:
         version: 1.9.0
       tsdown:
         specifier: catalog:build
-        version: 0.23.7(@arethetypeswrong/core@0.18.5)(@typescript/typescript6@6.0.2)(@volar/typescript@2.4.28(@typescript/typescript6@6.0.2))(oxc-resolver@11.24.2)(publint@0.3.25)(tsrs@7.1.0-beta.tsrs4)
+        version: 0.23.7(@arethetypeswrong/core@0.18.5)(@typescript/typescript6@6.0.2)(@volar/typescript@2.4.28(@typescript/typescript6@6.0.2))(oxc-resolver@11.24.2)(publint@0.3.25)(tsrs@7.1.0-beta.tsrs5)
       tsrs:
         specifier: catalog:tooling
-        version: 7.1.0-beta.tsrs4
+        version: 7.1.0-beta.tsrs5
       turbo:
         specifier: catalog:tooling
         version: 2.11.13
@@ -877,7 +877,7 @@ importers:
     dependencies:
       '@opencode/schema':
         specifier: catalog:opencode2
-        version: 2.3.2
+        version: 2.4.1
       effect:
         specifier: catalog:opencode2
         version: 4.1.0
@@ -890,7 +890,7 @@ importers:
     dependencies:
       '@opencode/schema':
         specifier: catalog:opencode2
-        version: 2.3.2
+        version: 2.4.1
       effect:
         specifier: catalog:opencode2
         version: 4.1.0
@@ -961,7 +961,7 @@ importers:
         version: 4.6.0
       simple-icons:
         specifier: catalog:frontend
-        version: 16.38.0
+        version: 16.38.1
       type-fest:
         specifier: catalog:types
         version: 6.0.3
@@ -1167,7 +1167,7 @@ importers:
         version: 4.0.0
       tsdown:
         specifier: catalog:build
-        version: 0.23.7(@arethetypeswrong/core@0.18.5)(@typescript/typescript6@6.0.2)(@volar/typescript@2.4.28(@typescript/typescript6@6.0.2))(oxc-resolver@11.24.2)(publint@0.3.25)(tsrs@7.1.0-beta.tsrs4)
+        version: 0.23.7(@arethetypeswrong/core@0.18.5)(@typescript/typescript6@6.0.2)(@volar/typescript@2.4.28(@typescript/typescript6@6.0.2))(oxc-resolver@11.24.2)(publint@0.3.25)(tsrs@7.1.0-beta.tsrs5)
       vitest:
         specifier: catalog:test
         version: 5.1.1(@opentelemetry/api@1.9.1)(@types/node@26.6.6)(@vitest/coverage-istanbul@5.1.1)(@vitest/coverage-v8@5.1.1)(jsdom@31.0.1)(vite@8.3.8(@types/node@26.6.6)(esbuild@0.28.2)(jiti@2.7.0)(yaml@2.9.1))
@@ -1179,7 +1179,7 @@ importers:
         version: link:../linter-utilities
       '@isentinel/eslint-config':
         specifier: catalog:lint
-        version: 7.1.0(patch_hash=1b233ac4095531c7d06d8c3fa70e322add76bfb16cbf1bc584644ad3cd4b7224)(1aac7f0a98d85ce30295778fe7601fd0)
+        version: 7.1.0(patch_hash=1b233ac4095531c7d06d8c3fa70e322add76bfb16cbf1bc584644ad3cd4b7224)(abf38b25b2eff324ca58644d194df166)
       eslint-plugin-astro:
         specifier: catalog:lint
         version: 3.2.1(@emnapi/core@1.11.3)(@emnapi/runtime@1.11.3)(@typescript-eslint/parser@8.73.0(@typescript/typescript6@6.0.2)(eslint@10.15.0(jiti@2.7.0)(supports-color@10.2.2))(supports-color@10.2.2))(eslint@10.15.0(jiti@2.7.0)(supports-color@10.2.2))(supports-color@10.2.2)
@@ -1204,7 +1204,7 @@ importers:
         version: 1.95.0(oxlint-tsgolint@7.0.2008)
       tsrs:
         specifier: catalog:tooling
-        version: 7.1.0-beta.tsrs4
+        version: 7.1.0-beta.tsrs5
       vitest:
         specifier: catalog:test
         version: 5.1.1(@opentelemetry/api@1.9.1)(@types/node@26.6.6)(@vitest/coverage-istanbul@5.1.1)(@vitest/coverage-v8@5.1.1)(jsdom@31.0.1)(vite@8.3.8(@types/node@26.6.6)(esbuild@0.28.2)(jiti@2.7.0)(yaml@2.9.1))
@@ -1213,7 +1213,7 @@ importers:
     dependencies:
       '@isentinel/eslint-config':
         specifier: catalog:lint
-        version: 7.1.0(patch_hash=1b233ac4095531c7d06d8c3fa70e322add76bfb16cbf1bc584644ad3cd4b7224)(1aac7f0a98d85ce30295778fe7601fd0)
+        version: 7.1.0(patch_hash=1b233ac4095531c7d06d8c3fa70e322add76bfb16cbf1bc584644ad3cd4b7224)(abf38b25b2eff324ca58644d194df166)
       '@small-rules/arktype-utilities':
         specifier: workspace:*
         version: link:../../packages/arktype-utilities
@@ -1235,7 +1235,7 @@ importers:
         version: 26.6.6
       tsrs:
         specifier: catalog:tooling
-        version: 7.1.0-beta.tsrs4
+        version: 7.1.0-beta.tsrs5
 
   tools/local-rules:
     dependencies:
@@ -1341,7 +1341,7 @@ importers:
         version: 26.6.6
       tsrs:
         specifier: catalog:tooling
-        version: 7.1.0-beta.tsrs4
+        version: 7.1.0-beta.tsrs5
 
   turbo/generators:
     dependencies:
@@ -1366,7 +1366,7 @@ importers:
         version: 26.6.6
       tsrs:
         specifier: catalog:tooling
-        version: 7.1.0-beta.tsrs4
+        version: 7.1.0-beta.tsrs5
       vitest:
         specifier: catalog:test
         version: 5.1.1(@opentelemetry/api@1.9.1)(@types/node@26.6.6)(@vitest/coverage-istanbul@5.1.1)(@vitest/coverage-v8@5.1.1)(jsdom@31.0.1)(vite@8.3.8(@types/node@26.6.6)(esbuild@0.28.2)(jiti@2.7.0)(yaml@2.9.1))
@@ -3930,9 +3930,6 @@ packages:
   '@opencode/protocol@2.4.1':
     resolution: {integrity: sha512-RYG7ZTmKMVQZifntclOzSFr+WoukftY6h46niMS1k1YJHa8PqqLPlZuXYVv3dcjWexyOTKnMrOLdNP1Fx/nifQ==}
 
-  '@opencode/schema@2.3.2':
-    resolution: {integrity: sha512-9PqnLzPNV0QTG3HrRHTVjVEQ2Hv+zcprM6QvwxNVdQ3RUTmtdpmUD6/0y0NQnHFzHwI3hpnkNCIstjw9TVsJcg==}
-
   '@opencode/schema@2.4.1':
     resolution: {integrity: sha512-lYkxvxAEbsJEf56o3P8C5ukTThhFRYqJuSGqsGr6QV9mmRxDyhI36ExuuMirXKoa3vmZOeU9tEm8U6Mp5rSnvw==}
 
@@ -5719,54 +5716,54 @@ packages:
     resolution: {integrity: sha512-w071DSzP94YfN6XiWhOxnLpYT3uqtxJBDYdh6Jdjzt+Ce6DNspJsPQgpC7rbts/B8tEkq0LHoYuIF/O5Jh5rPg==}
     engines: {node: '>=18'}
 
-  '@tsrs/darwin-arm64@7.1.0-beta.tsrs4':
-    resolution: {integrity: sha512-Be1McQGyHipWIjnkvytZmh7Wi4YVATvTfiEuPX34kfk+W7QCtTdUUHnuLZ7bzwy8LgL9VDCmyvQtWiF3MENxBQ==}
+  '@tsrs/darwin-arm64@7.1.0-beta.tsrs5':
+    resolution: {integrity: sha512-wRLJq3IDZjdLrh+lsipipCfYPpFjNW/0zjeM9azNLjA33OWjOIxT2THiKExf7bjkbr6SGCrrjDR+ZZyXYz4Rjg==}
     engines: {node: '>=16.20.0'}
     cpu: [arm64]
     os: [darwin]
 
-  '@tsrs/darwin-x64@7.1.0-beta.tsrs4':
-    resolution: {integrity: sha512-J9LM9ja4EGcA1/DNnWOo9smswK1Aa4xW+zbCubWdT/4z8SPwCmVwm5sn5KmvNBCHQHkke9KRrBl+zROqz6F74A==}
+  '@tsrs/darwin-x64@7.1.0-beta.tsrs5':
+    resolution: {integrity: sha512-jTZgFXcnDbkDZwq121fhcZv8YaoJCzSWshJJYRnfc2QqagI31Fn9Vjbiz/GgfoAvw32vK8OZrNCDzN2Cu9UkDQ==}
     engines: {node: '>=16.20.0'}
     cpu: [x64]
     os: [darwin]
 
-  '@tsrs/linux-arm64-gnu@7.1.0-beta.tsrs4':
-    resolution: {integrity: sha512-RIbwlpYWflMDq9XosRHL7gpwSV5fnEaUvjr3ehzKCcc7E6ozo0mH4m/OgQE3ts/4euWKzZxsK7lN6r091W5mWg==}
+  '@tsrs/linux-arm64-gnu@7.1.0-beta.tsrs5':
+    resolution: {integrity: sha512-o0ofV8Yw5IbaXR7wjIHaqBv9YddJ6Weot+IpYWfUNqG3YpAe4N5G0dU9vsCLX7eNNYx1mMyIZK0eyMV1r6qg2g==}
     engines: {node: '>=16.20.0'}
     cpu: [arm64]
     os: [linux]
     libc: [glibc]
 
-  '@tsrs/linux-arm64-musl@7.1.0-beta.tsrs4':
-    resolution: {integrity: sha512-4RGERFCpPayJ74T2eA+ky3VdIS0r1BezKIclqGWRTx/RXnj9H/1NbtEt0aKhj3TrTMPDmInlPiCwRJUv7M9kFA==}
+  '@tsrs/linux-arm64-musl@7.1.0-beta.tsrs5':
+    resolution: {integrity: sha512-Nki4kxNnp8qO+/8MtZeO0cAt8ifGHPbC9R0BepVlLuDdvR2cqfzym+l75zXtvnwW1nekmKwbNpHqsuHXoITYGQ==}
     engines: {node: '>=16.20.0'}
     cpu: [arm64]
     os: [linux]
     libc: [musl]
 
-  '@tsrs/linux-x64-gnu@7.1.0-beta.tsrs4':
-    resolution: {integrity: sha512-YIqFRStXq5yURR+zYDwIKcV126KH+EibPMJ1ZbfT2ToJ0w5zmRUKV/A5z0kjmQu6A6wItLZxOzKjU1v+ad5blA==}
+  '@tsrs/linux-x64-gnu@7.1.0-beta.tsrs5':
+    resolution: {integrity: sha512-hyg70btCCaMT3RvFYU0KEibFyQjFUUfrqk4zTl7rf/7G3HPO3X6sEs8J/AHYUvJB0cA+dXgU/adkiZf1XJI/XA==}
     engines: {node: '>=16.20.0'}
     cpu: [x64]
     os: [linux]
     libc: [glibc]
 
-  '@tsrs/linux-x64-musl@7.1.0-beta.tsrs4':
-    resolution: {integrity: sha512-TQeiFbrxowI26YDaUojRfV7DhDKjXlPWtz9DopyGtufFoKsv2efIzUiEAA8IVw689nUoi0CVl0aWTWio49lWMg==}
+  '@tsrs/linux-x64-musl@7.1.0-beta.tsrs5':
+    resolution: {integrity: sha512-5RI2Ziy8eSkvUi/oeQbrCSzJC/AP7DCtn9IEOWS74BhuQK7WUr1op5ozQMsn4kA6DfuCAuYSQZygTk2Zv3Ib+g==}
     engines: {node: '>=16.20.0'}
     cpu: [x64]
     os: [linux]
     libc: [musl]
 
-  '@tsrs/win32-arm64@7.1.0-beta.tsrs4':
-    resolution: {integrity: sha512-0YRK8h3vCTtJM7j+GpWByK8ehWMdHPCETLEAeQiW6Xy4wrrJJ2Fso/1FeF6gfi6LyCq1mZMfydn2OiDoJmAu1A==}
+  '@tsrs/win32-arm64@7.1.0-beta.tsrs5':
+    resolution: {integrity: sha512-RqvW3yaksYl8h8m+aHGfWT9He6AwgvhJ38+8rcuE+Mz12DxVLeRVvWco5k1DZ3nMT056Erohyuwuv4F3A5Tnww==}
     engines: {node: '>=16.20.0'}
     cpu: [arm64]
     os: [win32]
 
-  '@tsrs/win32-x64@7.1.0-beta.tsrs4':
-    resolution: {integrity: sha512-JW5JoAammbwL2pXkhC//p/9t7lxg34zHgtA6L5ixiCDw5s+hxxEc85h3sm9M3oYUqCOOi+W6Jw5PLDClN3nMHA==}
+  '@tsrs/win32-x64@7.1.0-beta.tsrs5':
+    resolution: {integrity: sha512-ZTEC3ITNsWH54a/0CtlRhNNfstVFHeg40sUjuQMYIlLiLxRFOXOPjFL/eyjZAS/1fNM+DGtz+6RY6AAMdqyoXw==}
     engines: {node: '>=16.20.0'}
     cpu: [x64]
     os: [win32]
@@ -9560,8 +9557,8 @@ packages:
     resolution: {integrity: sha512-endqECJkfhozrXMK5ngu/UAA0xVcVEFdnHJCElGaExypjW+HK5i6zu3NteLoaX/iFbRUbC3+DjttQs0GARr+5w==}
     engines: {node: ^20.17.0 || >=22.9.0}
 
-  simple-icons@16.38.0:
-    resolution: {integrity: sha512-B0Wws90eL0Fm65aH35CA8kM+7/Zzgsaytt0DndBx7VFm3+o9HurVIVRQZ1hvqqYYIyNJq7ycn3kQm2v2FhiWSQ==}
+  simple-icons@16.38.1:
+    resolution: {integrity: sha512-q4JnGp1cgeASp4jzEsmSh/7BD/e2y7aYO8XST+QBEvOJ5wzZ/9WRmKsI+QUwkfPUSiXC+sfh2+QetD38zl3N0g==}
     engines: {node: '>=0.12.18'}
 
   sisteransi@1.0.5:
@@ -9885,8 +9882,8 @@ packages:
   tslib@2.9.1:
     resolution: {integrity: sha512-a4Ux9VKuIMHsOS7ENbEq6hK2ZGYIT27Rtl0E4eD9KqwxhKiQeMZE/9xb3IdYwWaSOyIBQLExhQgXDTYoiCxnWA==}
 
-  tsrs@7.1.0-beta.tsrs4:
-    resolution: {integrity: sha512-tPeUolNTUDJFk1Fc660PyFGUK/epGbuQVoo+2GnCIWkNDWp8i1DMI5n2X8pxxevi/3zbO8UvIKjWgE4T7OOCeA==}
+  tsrs@7.1.0-beta.tsrs5:
+    resolution: {integrity: sha512-z+hNizBykB1mv/XxMnMYMSGuwnYEk6S708LGEEaTmdLu6eaH4NOtVemySycbEiW/SCjMeYMk+SZfVdRJwEmYXA==}
     engines: {node: '>=16.20.0'}
     hasBin: true
 
@@ -12760,7 +12757,7 @@ snapshots:
 
   '@isentinel/dict-roblox@1.0.24': {}
 
-  '@isentinel/eslint-config@7.1.0(patch_hash=1b233ac4095531c7d06d8c3fa70e322add76bfb16cbf1bc584644ad3cd4b7224)(1aac7f0a98d85ce30295778fe7601fd0)':
+  '@isentinel/eslint-config@7.1.0(patch_hash=1b233ac4095531c7d06d8c3fa70e322add76bfb16cbf1bc584644ad3cd4b7224)(abf38b25b2eff324ca58644d194df166)':
     dependencies:
       '@antfu/install-pkg': 2.1.0
       '@clack/prompts': 1.9.0
@@ -12826,7 +12823,7 @@ snapshots:
       eslint-plugin-react-x: 5.30.6(@typescript/typescript6@6.0.2)(eslint@10.15.0(jiti@2.7.0)(supports-color@10.2.2))(supports-color@10.2.2)
       oxlint: 1.95.0(oxlint-tsgolint@7.0.2008)
       oxlint-tsgolint: 7.0.2008
-      tsrs: 7.1.0-beta.tsrs4
+      tsrs: 7.1.0-beta.tsrs5
     transitivePeerDependencies:
       - '@astrojs/compiler-rs'
       - '@eslint/json'
@@ -13346,11 +13343,6 @@ snapshots:
   '@opencode/protocol@2.4.1':
     dependencies:
       '@opencode/schema': 2.4.1
-      effect: 4.1.0
-
-  '@opencode/schema@2.3.2':
-    dependencies:
-      '@standard-schema/spec': 1.1.0
       effect: 4.1.0
 
   '@opencode/schema@2.4.1':
@@ -14690,28 +14682,28 @@ snapshots:
       '@ts-graphviz/ast': 2.0.7
       '@ts-graphviz/common': 2.1.5
 
-  '@tsrs/darwin-arm64@7.1.0-beta.tsrs4':
+  '@tsrs/darwin-arm64@7.1.0-beta.tsrs5':
     optional: true
 
-  '@tsrs/darwin-x64@7.1.0-beta.tsrs4':
+  '@tsrs/darwin-x64@7.1.0-beta.tsrs5':
     optional: true
 
-  '@tsrs/linux-arm64-gnu@7.1.0-beta.tsrs4':
+  '@tsrs/linux-arm64-gnu@7.1.0-beta.tsrs5':
     optional: true
 
-  '@tsrs/linux-arm64-musl@7.1.0-beta.tsrs4':
+  '@tsrs/linux-arm64-musl@7.1.0-beta.tsrs5':
     optional: true
 
-  '@tsrs/linux-x64-gnu@7.1.0-beta.tsrs4':
+  '@tsrs/linux-x64-gnu@7.1.0-beta.tsrs5':
     optional: true
 
-  '@tsrs/linux-x64-musl@7.1.0-beta.tsrs4':
+  '@tsrs/linux-x64-musl@7.1.0-beta.tsrs5':
     optional: true
 
-  '@tsrs/win32-arm64@7.1.0-beta.tsrs4':
+  '@tsrs/win32-arm64@7.1.0-beta.tsrs5':
     optional: true
 
-  '@tsrs/win32-x64@7.1.0-beta.tsrs4':
+  '@tsrs/win32-x64@7.1.0-beta.tsrs5':
     optional: true
 
   '@tufjs/canonical-json@2.0.0': {}
@@ -19189,7 +19181,7 @@ snapshots:
     dependencies:
       glob: 10.5.0
 
-  rolldown-plugin-dts@0.30.0(@typescript/typescript6@6.0.2)(@volar/typescript@2.4.28(@typescript/typescript6@6.0.2))(oxc-resolver@11.24.2)(rolldown@1.3.0)(tsrs@7.1.0-beta.tsrs4):
+  rolldown-plugin-dts@0.30.0(@typescript/typescript6@6.0.2)(@volar/typescript@2.4.28(@typescript/typescript6@6.0.2))(oxc-resolver@11.24.2)(rolldown@1.3.0)(tsrs@7.1.0-beta.tsrs5):
     dependencies:
       dts-resolver: 3.0.0(oxc-resolver@11.24.2)
       get-tsconfig: 5.0.0-beta.6
@@ -19198,7 +19190,7 @@ snapshots:
       yuku: 0.27.0
     optionalDependencies:
       '@volar/typescript': 2.4.28(@typescript/typescript6@6.0.2)
-      tsrs: 7.1.0-beta.tsrs4
+      tsrs: 7.1.0-beta.tsrs5
       typescript: '@typescript/typescript6@6.0.2'
     transitivePeerDependencies:
       - '@yuku-toolchain/wasm'
@@ -19440,7 +19432,7 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  simple-icons@16.38.0: {}
+  simple-icons@16.38.1: {}
 
   sisteransi@1.0.5: {}
 
@@ -19725,7 +19717,7 @@ snapshots:
       minimist: 1.2.8
       strip-bom: 3.0.0
 
-  tsdown@0.23.7(@arethetypeswrong/core@0.18.5)(@typescript/typescript6@6.0.2)(@volar/typescript@2.4.28(@typescript/typescript6@6.0.2))(oxc-resolver@11.24.2)(publint@0.3.25)(tsrs@7.1.0-beta.tsrs4):
+  tsdown@0.23.7(@arethetypeswrong/core@0.18.5)(@typescript/typescript6@6.0.2)(@volar/typescript@2.4.28(@typescript/typescript6@6.0.2))(oxc-resolver@11.24.2)(publint@0.3.25)(tsrs@7.1.0-beta.tsrs5):
     dependencies:
       cac: 7.1.0
       defu: 6.1.7
@@ -19735,7 +19727,7 @@ snapshots:
       obug: 3.0.0
       picomatch: 4.0.7
       rolldown: 1.3.0
-      rolldown-plugin-dts: 0.30.0(@typescript/typescript6@6.0.2)(@volar/typescript@2.4.28(@typescript/typescript6@6.0.2))(oxc-resolver@11.24.2)(rolldown@1.3.0)(tsrs@7.1.0-beta.tsrs4)
+      rolldown-plugin-dts: 0.30.0(@typescript/typescript6@6.0.2)(@volar/typescript@2.4.28(@typescript/typescript6@6.0.2))(oxc-resolver@11.24.2)(rolldown@1.3.0)(tsrs@7.1.0-beta.tsrs5)
       tinyexec: 1.3.1
       tinyglobby: 0.2.17
       tinyps: 0.5.2
@@ -19757,16 +19749,16 @@ snapshots:
 
   tslib@2.9.1: {}
 
-  tsrs@7.1.0-beta.tsrs4:
+  tsrs@7.1.0-beta.tsrs5:
     optionalDependencies:
-      '@tsrs/darwin-arm64': 7.1.0-beta.tsrs4
-      '@tsrs/darwin-x64': 7.1.0-beta.tsrs4
-      '@tsrs/linux-arm64-gnu': 7.1.0-beta.tsrs4
-      '@tsrs/linux-arm64-musl': 7.1.0-beta.tsrs4
-      '@tsrs/linux-x64-gnu': 7.1.0-beta.tsrs4
-      '@tsrs/linux-x64-musl': 7.1.0-beta.tsrs4
-      '@tsrs/win32-arm64': 7.1.0-beta.tsrs4
-      '@tsrs/win32-x64': 7.1.0-beta.tsrs4
+      '@tsrs/darwin-arm64': 7.1.0-beta.tsrs5
+      '@tsrs/darwin-x64': 7.1.0-beta.tsrs5
+      '@tsrs/linux-arm64-gnu': 7.1.0-beta.tsrs5
+      '@tsrs/linux-arm64-musl': 7.1.0-beta.tsrs5
+      '@tsrs/linux-x64-gnu': 7.1.0-beta.tsrs5
+      '@tsrs/linux-x64-musl': 7.1.0-beta.tsrs5
+      '@tsrs/win32-arm64': 7.1.0-beta.tsrs5
+      '@tsrs/win32-x64': 7.1.0-beta.tsrs5
 
   tuf-js@4.1.0(supports-color@10.2.2):
     dependencies:
@@ -20393,7 +20385,7 @@ time:
   '@mitata/counters@0.0.8': '2025-01-09T11:02:22.407Z'
   '@octokit/rest@22.0.1': '2025-10-31T20:59:36.519Z'
   '@opencode/plugin@2.4.1': '2026-11-23T15:45:59.255Z'
-  '@opencode/schema@2.3.2': '2026-11-18T01:23:20.055Z'
+  '@opencode/schema@2.4.1': '2026-11-23T15:47:06.639Z'
   '@openrouter/sdk@1.5.128': '2026-11-21T18:18:20.334Z'
   '@playwright/test@1.65.1': '2026-11-13T21:12:37.610Z'
   '@stryker-mutator/api@10.1.1': '2026-10-23T19:18:09.456Z'
@@ -20478,13 +20470,13 @@ time:
   sfw@2.0.6: '2026-05-22T16:42:22.828Z'
   sharp@0.35.5: '2026-09-27T13:46:24.509Z'
   shiki@4.6.0: '2026-11-02T04:36:18.499Z'
-  simple-icons@16.38.0: '2026-11-15T13:24:03.159Z'
+  simple-icons@16.38.1: '2026-11-22T02:29:36.670Z'
   skills@1.9.0: '2026-11-16T10:30:48.447Z'
   smol-toml@1.9.1: '2026-10-09T10:21:39.612Z'
   spdx-expression-parse@5.0.0: '2026-07-16T01:01:41.169Z'
   tinyexec@1.3.1: '2026-09-03T08:50:07.324Z'
   tsdown@0.23.7: '2026-11-06T09:57:16.179Z'
-  tsrs@7.1.0-beta.tsrs4: '2026-11-20T18:54:47.055Z'
+  tsrs@7.1.0-beta.tsrs5: '2026-11-23T21:09:47.275Z'
   turbo@2.11.13: '2026-11-18T15:28:52.490Z'
   type-fest@6.0.3: '2026-11-19T07:47:40.570Z'
   verb-corpus@3.5.0: '2022-07-22T06:19:45.834Z'
