@@ -114,7 +114,7 @@ overrides:
   vite: ^8
 
 patchedDependencies:
-  "@isentinel/eslint-config@7.1.0": patches/@isentinel__eslint-config@7.1.0.patch
+  "@isentinel/eslint-config@8.0.0": patches/@isentinel__eslint-config@8.0.0.patch
 
 catalogs:
   benchmark:
