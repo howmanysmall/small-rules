@@ -75,12 +75,19 @@ function containsIdentifier(node: ESTree.Node, name: string): boolean {
 	return found;
 }
 
-function isMapCopyCall(call: ESTree.CallExpression, loopDeclarator: ESTree.VariableDeclarator): boolean {
-	/* v8 ignore next -- the caller only passes statically named member calls. @preserve */
+type MemberCall = ESTree.CallExpression & { callee: ESTree.MemberExpression };
+
+function isMemberCall(call: ESTree.CallExpression): call is MemberCall {
+	return isMemberExpression(call.callee);
+}
+
+function isCopyMethodCall(call: MemberCall, methodName: string, expectedArity: number): boolean {
+	return isIdentifierNamed(call.callee.property, methodName) && call.arguments.length === expectedArity;
+}
+
+function isMapCopyCall(call: MemberCall, loopDeclarator: ESTree.VariableDeclarator): boolean {
 	if (
-		!isMemberExpression(call.callee) ||
-		!isIdentifierNamed(call.callee.property, "set") ||
-		call.arguments.length !== 2 ||
+		!isCopyMethodCall(call, "set", 2) ||
 		!isArrayPattern(loopDeclarator.id) ||
 		loopDeclarator.id.elements.length !== 2
 	) {
@@ -105,15 +112,8 @@ function isMapCopyCall(call: ESTree.CallExpression, loopDeclarator: ESTree.Varia
 	return isIdentifierNamed(keyArgument, keyBinding.name) && isIdentifierNamed(valueArgument, valueBinding.name);
 }
 
-function isSetCopyCall(call: ESTree.CallExpression, loopDeclarator: ESTree.VariableDeclarator): boolean {
-	if (
-		!isMemberExpression(call.callee) ||
-		!isIdentifierNamed(call.callee.property, "add") ||
-		call.arguments.length !== 1 ||
-		!isIdentifier(loopDeclarator.id)
-	) {
-		return false;
-	}
+function isSetCopyCall(call: MemberCall, loopDeclarator: ESTree.VariableDeclarator): boolean {
+	if (!isCopyMethodCall(call, "add", 1) || !isIdentifier(loopDeclarator.id)) return false;
 
 	const [valueArgument] = call.arguments;
 	/* v8 ignore next -- the length check proves the element exists. @preserve */
@@ -141,7 +141,7 @@ function isMatchingCopyLoop(
 	const call = getSingleLoopCall(loop);
 	if (
 		call === undefined ||
-		!isMemberExpression(call.callee) ||
+		!isMemberCall(call) ||
 		call.callee.computed ||
 		!isIdentifierNamed(call.callee.object, destination.identifier.name)
 	) {
