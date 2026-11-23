@@ -136,6 +136,8 @@ const DEFAULT_HOOKS = new Map<string, HookConfig>([
 
 const STABLE_HOOKS = new Map<string, StableResult>([
 	["useBinding", true],
+	// An effect event is not reactive; React forbids listing it as a dependency.
+	["useEffectEvent", true],
 	["useReducer", new Set([1])],
 	["useRef", true],
 	["useState", new Set([1])],

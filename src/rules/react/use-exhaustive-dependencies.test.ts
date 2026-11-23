@@ -1592,6 +1592,32 @@ function Component() {
 }
 `,
 
+			// An effect event is not reactive, so it is never a dependency
+			`
+function Component({ status, onStatus }) {
+    const onPolled = useEffectEvent((next) => {
+        onStatus(next);
+    });
+    useEffect(() => {
+        if (status !== "running") return undefined;
+        const timer = setInterval(() => {
+            readStatus().then((next) => {
+                onPolled(next);
+            });
+        }, 1000);
+        return () => clearInterval(timer);
+    }, [status]);
+}
+`,
+			`
+function Component({ value, onChange }) {
+    const onValue = React.useEffectEvent(onChange);
+    useEffect(() => {
+        onValue(value);
+    }, [value]);
+}
+`,
+
 			// Props with stable setter
 			`
 function Component(props) {
