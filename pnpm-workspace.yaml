@@ -23,7 +23,7 @@ minimumReleaseAgeExclude:
   - "@astrojs/starlight"
   - "@biomejs/*"
   - "@expressive-code/*"
-  - "@isentinel/dict-*"
+  - "@isentinel/*"
   - "@jsr/cliffy__*"
   - "@opencode/*"
   - "@oxfmt/*"
