@@ -10,6 +10,7 @@ entry = [
 	"tools/vite-configuration/src/setup.ts"
 ]
 ignorePatterns = ["tests/fixtures/**", "plugins/**", "src/generated/**", ".benchmarks/**", ".opencode/**", ".claude/**"]
+ignoreBinaries = ["hk", "nr"]
 ignoreDependencies = [
 	"@astrojs/markdown-satteri",
 	"@e18e/eslint-plugin",
@@ -31,7 +32,7 @@ ignoreDependencies = [
 	"eslint-plugin-sonarjs",
 	"eslint-plugin-unicorn",
 	"eslint-plugin-unused-imports",
-	"sharp"
+	"sharp",
 ]
 ignoreExportsUsedInFile = true
 overrides = []
@@ -70,7 +71,7 @@ coverage = ".cache/istanbul/coverage-final.json"
 ignore = [
 	"**/*.{bench,test}.ts",
 	"scripts/**",
-	"*.config.ts",
+	"**/*.config.ts",
 	"tests/**",
 	"tools/rule-harness/**",
 ]
