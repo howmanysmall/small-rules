@@ -1,7 +1,7 @@
 entry = [
 	"src/reset.d.ts",
 	"*.config.ts",
-	"scripts/*.ts",
+	"scripts/**/*.ts",
 	"tests/**/*.fuzz.ts",
 	"**/*.bench.ts",
 	"documentation/src/components/overrides/*.astro",
