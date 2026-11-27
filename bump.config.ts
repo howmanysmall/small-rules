@@ -5,7 +5,6 @@ const configuration = defineConfig({
 	commit: true,
 	confirm: true,
 	execute: "node --run changelog:version",
-	noGitCheck: false,
 	push: true,
 	tag: true,
 });
