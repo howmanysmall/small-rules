@@ -135,7 +135,7 @@ catalogs:
     "@astrojs/markdown-satteri": 0.4.10
     "@astrojs/mdx": 8.1.6
     "@astrojs/react": 7.1.9
-    "@astrojs/starlight": 0.43.1
+    "@astrojs/starlight": 0.43.2
     "@fontsource-variable/ibm-plex-sans": 5.3.0
     "@fontsource-variable/newsreader": 5.3.0
     "@fontsource/ibm-plex-mono": 5.3.0
@@ -147,47 +147,47 @@ catalogs:
     shiki: 4.6.0
     simple-icons: 16.38.1
   lint:
-    "@biomejs/biome": 2.6.8
+    "@biomejs/biome": 2.6.9
     "@e18e/eslint-plugin": 0.8.1
     "@isentinel/eslint-config": 8.0.0
     "@stylistic/eslint-plugin": 6.0.1
     "@vitest/eslint-plugin": 1.6.28
     eslint: 10.15.0
     eslint-plugin-antfu: 3.3.1
-    eslint-plugin-astro: 3.2.1
+    eslint-plugin-astro: 3.2.2
     eslint-plugin-better-max-params: 1.0.0
     eslint-plugin-comment-length: 2.3.1
     eslint-plugin-de-morgan: 2.3.0
     eslint-plugin-eslint-plugin: 7.6.2
     eslint-plugin-flawless: 1.18.1
     eslint-plugin-jest-extended: 3.0.1
-    eslint-plugin-jsdoc: 65.5.2
-    eslint-plugin-n: 18.5.0
-    eslint-plugin-oxfmt: 0.33.0
+    eslint-plugin-jsdoc: 65.5.6
+    eslint-plugin-n: 18.6.0
+    eslint-plugin-oxfmt: 0.34.0
     eslint-plugin-perfectionist: 5.14.0
     eslint-plugin-pnpm: 1.9.1
     eslint-plugin-react-jsx: 5.30.6
     eslint-plugin-react-naming-convention: 5.30.6
     eslint-plugin-react-x: 5.30.6
     eslint-plugin-roblox-ts: 1.5.0
-    eslint-plugin-sonarjs: 4.2.2
+    eslint-plugin-sonarjs: 4.2.3
     eslint-plugin-unicorn: 80.0.0
     eslint-plugin-unused-imports: 4.4.1
-    fallow: 3.46.0
+    fallow: 3.49.0
     oxfmt: 0.80.0
     oxlint: 1.95.0
     oxlint-plugin-react-doctor: 0.9.23
-    oxlint-tsgolint: 7.0.2008
+    oxlint-tsgolint: 7.0.2009
     react-doctor: 0.9.23
   opencode2:
-    "@opencode/plugin": 2.4.1
-    "@opencode/schema": 2.4.1
+    "@opencode/plugin": 2.4.2
+    "@opencode/schema": 2.4.2
     effect: 4.1.0
   runtime:
     arktype: 2.2.10
     # eslint-disable-next-line pnpm/yaml-no-duplicate-catalog-item -- different versions.
-    effect: 4.1.5
-    ignore: 7.0.16
+    effect: 4.1.6
+    ignore: 7.0.17
     minimatch: 11.0.9
     oxc-resolver: 11.24.2
     oxlint-plugin-utilities: 1.1.0
@@ -196,7 +196,7 @@ catalogs:
     "@clack/prompts": 1.9.0
     "@cliffy/command": npm:@jsr/cliffy__command@1.3.1
     "@octokit/rest": 22.0.1
-    "@openrouter/sdk": 1.5.128
+    "@openrouter/sdk": 1.5.142
     "@std/msgpack": npm:@jsr/std__msgpack@1.0.3
     ansis: 4.5.0
     boxen: 9.0.0
@@ -210,26 +210,26 @@ catalogs:
     pretty-ms: 10.0.0
     smol-toml: 1.9.1
     spdx-expression-parse: 5.0.0
-    tinyexec: 1.3.1
+    tinyexec: 1.4.0
     verb-corpus: 3.5.0
     zx: 8.8.5
   test:
-    "@fast-check/vitest": 0.5.0
+    "@fast-check/vitest": 0.6.0
     "@playwright/test": 1.65.1
     "@stryker-mutator/api": 10.1.1
     "@stryker-mutator/core": 10.1.1
     "@stryker-mutator/vitest-runner": 10.1.1
     "@testing-library/react": 16.3.3
-    "@testing-library/user-event": 14.6.12
+    "@testing-library/user-event": 14.6.13
     "@total-typescript/shoehorn": 0.1.2
-    "@vitest/coverage-istanbul": 5.1.1
-    "@vitest/coverage-v8": 5.1.1
+    "@vitest/coverage-istanbul": 5.1.2
+    "@vitest/coverage-v8": 5.1.2
     "@vitiate/core": 0.3.1
     "@vitiate/fuzzed-data-provider": 0.3.1
     fast-check: 4.11.0
     jest-extended: 7.0.0
     jsdom: 31.0.1
-    vitest: 5.1.1
+    vitest: 5.1.2
     vitiate: 0.3.1
   tooling:
     "@isentinel/hooks": 1.7.0
@@ -238,17 +238,17 @@ catalogs:
     bumpp: 12.3.0
     jiti: 2.7.0
     pkg-pr-new: 0.0.94
-    pncat: 0.13.4
+    pncat: 0.14.0
     sfw: 2.0.6
-    skills: 1.9.0
+    skills: 1.9.1
     tsrs: 7.1.0-beta.tsrs5
     turbo: 2.11.13
     typescript: npm:@typescript/typescript6@^6.0.2
   types:
     "@total-typescript/ts-reset": 0.6.1
     "@types/bun": 1.4.5
-    "@types/node": ^26.6.6
-    "@types/react": 19.3.0
+    "@types/node": ^26.6.11
+    "@types/react": 19.3.3
     "@types/react-dom": 19.3.0
     "@types/spdx-expression-parse": 4.0.0
     type-fest: 6.0.3
