@@ -244,6 +244,8 @@ describe("no-known-value-widening", () => {
 			'const value: {} = "one";',
 			"type A = B; type B = A; const value: A = {};",
 			"function f(p: object) { const v: unknown = p; }",
+			"import { source } from './source'; const value: unknown = source;",
+			"function load(load: string): void {} const value: unknown = load;",
 			"const v: unknown = undefined;",
 			"let total = 0; total += 1;",
 			"class Owner { decorated; }",

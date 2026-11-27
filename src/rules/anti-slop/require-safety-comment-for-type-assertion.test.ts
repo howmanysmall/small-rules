@@ -277,6 +277,25 @@ describe("require-safety-comment-for-type-assertion", () => {
 				errors: [{ line: 4, messageId: "missingSafetyComment" }],
 				settings: tsgolint2002,
 			},
+			{
+				code: [
+					"/* oxlint-disable typescript/no-unsafe-type-assertion -- first block */",
+					"/* oxlint-enable typescript/no-unsafe-type-assertion */",
+					"/* oxlint-disable typescript/no-unsafe-type-assertion */",
+					"const later = raw as Foo;",
+				].join("\n"),
+				errors: [{ line: 4, messageId: "missingSafetyComment" }],
+				settings: tsgolint2002,
+			},
+			{
+				code: [
+					"/* oxlint-disable typescript/no-unsafe-type-assertion, no-console -- legacy block */",
+					"/* oxlint-enable typescript/no-unsafe-type-assertion */",
+					"const later = raw as Foo;",
+				].join("\n"),
+				errors: [{ line: 3, messageId: "missingSafetyComment" }],
+				settings: tsgolint2002,
+			},
 		],
 		valid: [
 			{
@@ -342,6 +361,22 @@ describe("require-safety-comment-for-type-assertion", () => {
 			},
 			{
 				code: "// SAFETY: this switch is fine\nswitch (kind) {\n\tcase 1:\n\t\twhile (other as boolean) {}\n}",
+				errors: [missingSafetyComment],
+			},
+			{
+				code: "const first = 1; // SAFETY: first is fine\nconsume(raw as Foo);",
+				errors: [missingSafetyComment],
+			},
+			{
+				code: "const first = 1; // SAFETY: first is fine\ntarget = raw as Foo;",
+				errors: [missingSafetyComment],
+			},
+			{
+				code: "const first = raw as Foo; // SAFETY: first is fine\nconsume(other as Foo);",
+				errors: [missingSafetyComment, missingSafetyComment],
+			},
+			{
+				code: "switch (kind) {\n\tcase 1:\n\t\tprepare(); // SAFETY: prepare is fine\n\t\tconsume(raw as Foo);\n}",
 				errors: [missingSafetyComment],
 			},
 		],
