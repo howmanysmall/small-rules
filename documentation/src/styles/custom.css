@@ -180,7 +180,6 @@ site-search kbd {
 
 nav.sidebar,
 #starlight__sidebar {
-	/* biome-ignore lint/suspicious/useBaseline: opt-out only; browsers without scroll anchoring already behave this way */
 	overflow-anchor: none;
 }
 
