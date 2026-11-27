@@ -72,6 +72,22 @@ describe("no-dead-store", () => {
 				errors: [{ messageId: "deadStore" }],
 			},
 			{
+				// Falling through runs the next case, so its write replaces the
+				// value before any read.
+				code: "function f(k: number) { let v = make(); switch (k) { case 1: v = 2; case 2: v = 3; return v; } return 0; }",
+				errors: [{ messageId: "deadStore" }],
+			},
+			{
+				// Falling through skips the later case's test.
+				code: "function f(k: number) { let v = make(); switch (k) { case 1: v = 2; case v: return 1; } return 0; }",
+				errors: [{ messageId: "deadStore" }],
+			},
+			{
+				// A return inside a nested function does not leave the case.
+				code: "function f(k: number) { let v = make(); switch (k) { case 1: v = 2; run(() => { return; }); case 2: v = 3; return v; } return 0; }",
+				errors: [{ messageId: "deadStore" }],
+			},
+			{
 				// A block at the top level runs with the module, not inside a
 				// function.
 				code: "{ let attempt = first(); attempt = second(); publish(attempt); }",
@@ -165,6 +181,12 @@ describe("no-dead-store", () => {
 				documentation: { id: "pass", title: "Value used conditionally" },
 			},
 			"let processState = createState();",
+			// A jump in a case on the way may leave the switch before the
+			// later write runs.
+			"function f(k: number, x: boolean) { let v = 1; switch (k) { case 1: v = 2; case 2: if (x) break; case 3: v = 3; } return v; }",
+			"function f(k: number, x: boolean) { let v = 1; switch (k) { case 1: v = 2; if (x) { break; } case 2: v = 3; } return v; }",
+			// A write in a case test is read by the body of that case.
+			"function f(k: number) { let v = 1; switch (k) { case (v = 2): return v; } return 0; }",
 			"function createReader() { const document = openDocument(); return () => document; }",
 			"function migrate() { let version = currentVersion(); version = upgrade(version); return version; }",
 			"function recover() { let checkpoint; try { checkpoint = saveCheckpoint(); execute(); } catch { restore(checkpoint); } }",

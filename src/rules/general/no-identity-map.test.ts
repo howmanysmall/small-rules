@@ -241,6 +241,27 @@ joined;
 				options: [{ ignoreDefaultParameters: true }],
 				errors: [{ messageId: "identityArrayMap" }],
 			},
+			// A receiver that binds looser than `.` keeps its parentheses.
+			{
+				code: "const size = (flag ? first : second).map((item) => item).length;",
+				output: "const size = (flag ? first : second).length;",
+				errors: [{ messageId: "identityArrayMap" }],
+			},
+			{
+				code: "async function f() { return (await load()).map((item) => item).length; }",
+				output: "async function f() { return (await load()).length; }",
+				errors: [{ messageId: "identityArrayMap" }],
+			},
+			{
+				code: "consume((first, second).map((item) => item));",
+				output: "consume((first, second));",
+				errors: [{ messageId: "identityArrayMap" }],
+			},
+			{
+				code: "const copy = (flag ? first : second).map((item) => item);",
+				output: "const copy = flag ? first : second;",
+				errors: [{ messageId: "identityArrayMap" }],
+			},
 		],
 		valid: [
 			{ code: "binding.map(v => v + 1)", documentation: { id: "pass", title: "Transforming map callback" } },

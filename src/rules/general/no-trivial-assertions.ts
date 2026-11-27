@@ -287,6 +287,25 @@ function reportTrivialExpect(context: Context, node: ESTree.CallExpression): voi
 	reportComparisonAssertion(context, actual, expected, isIdentity, negated, negated ? "not.toEqual" : "toEqual");
 }
 
+/**
+ * Whether a deep comparison is an ordinary expectation. A deep comparison
+ * looks at contents, so a fresh value on one side is not an identity check
+ * that can never pass, unless the other side is a primitive constant that it
+ * can never equal.
+ *
+ * @param sourceCode - Resolves constant bindings.
+ * @param left - The first compared value.
+ * @param right - The second compared value.
+ * @returns Whether exactly one side is fresh and the other is not a constant.
+ */
+function isOrdinaryDeepComparison(sourceCode: SourceCode, left: ESTree.Node, right: ESTree.Node): boolean {
+	const isLeftFresh = isFreshReferenceExpression(left);
+	if (isLeftFresh === isFreshReferenceExpression(right)) return false;
+
+	const other = isLeftFresh ? right : left;
+	return resolveConstantPrimitive(sourceCode, other, new Set()) === undefined;
+}
+
 function reportTrivialAssert(context: Context, node: ESTree.CallExpression): void {
 	if (!isMemberExpression(node.callee) || !isIdentifierNamed(node.callee.object, "assert")) return;
 
@@ -313,10 +332,7 @@ function reportTrivialAssert(context: Context, node: ESTree.CallExpression): voi
 	const isStrict = ASSERT_STRICT_METHODS.has(method);
 	if (!isStrict && !ASSERT_LOOSE_METHODS.has(method)) return;
 
-	// A deep comparison looks at contents, so a fresh value on one side is an
-	// ordinary expectation and not an identity check that can never pass.
-	const isOneSideFresh = isFreshReferenceExpression(left) !== isFreshReferenceExpression(right);
-	if (isOneSideFresh && ASSERT_DEEP_STRICT_METHODS.has(method)) return;
+	if (ASSERT_DEEP_STRICT_METHODS.has(method) && isOrdinaryDeepComparison(context.sourceCode, left, right)) return;
 
 	const negated = method.startsWith("not");
 	reportComparisonAssertion(

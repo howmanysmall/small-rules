@@ -3,8 +3,11 @@ import {
 	FUNCTION_DECLARATION,
 	FUNCTION_EXPRESSION,
 	isBlockStatement,
+	isCallExpression,
 	isCatchClause,
+	isClass,
 	isClassBody,
+	isExpressionStatement,
 	isIdentifier,
 	isImportDeclaration,
 	isMemberExpression,
@@ -13,11 +16,12 @@ import {
 	isPrivateIdentifier,
 	isProperty,
 	isPropertyDefinitionRaw,
+	isSuper,
 	isVariableDeclarator,
 } from "@small-rules/oxlint-utilities";
 import { Predicate } from "effect";
 
-import { forEachNode } from "$oxc-utilities/ast-utilities";
+import { forEachNode, pushChildScopes, STOP_NODE_TRAVERSAL } from "$oxc-utilities/ast-utilities";
 import { createRule } from "$oxc-utilities/create-rule";
 
 import type { ESTree, Fix, Scope, SourceCode, Visitor } from "oxlint-plugin-utilities";
@@ -126,7 +130,53 @@ function isAccessor(member?: ClassMember): boolean {
  * @returns Whether the fix is withheld.
  */
 function isFixWithheld(sourceCode: SourceCode, node: ESTree.ThrowStatement, member?: ClassMember): boolean {
-	return isAccessor(member) || sourceCode.getCommentsInside(node).length > 0;
+	return isAccessor(member) || isBeforeSuperCall(node, member) || sourceCode.getCommentsInside(node).length > 0;
+}
+
+function hasSuperClass(node: ESTree.Node | null): boolean {
+	return node !== null && isClass(node) && node.superClass !== null;
+}
+
+function isInFunctionBody({ parent }: ESTree.Node, functionNode: ESTree.Node): boolean {
+	return parent?.parent === functionNode;
+}
+
+function isSuperCallStatement(node: ESTree.Node): boolean {
+	return isExpressionStatement(node) && isCallExpression(node.expression) && isSuper(node.expression.callee);
+}
+
+/**
+ * Whether the throw is in a derived class constructor where `this` may not be
+ * initialized yet. Only a `super()` statement directly in the constructor body
+ * and before the throw proves that it is.
+ *
+ * @param node - The throw statement.
+ * @param member - The class member the throw sits in, if any.
+ * @returns Whether `this` may be used before `super()`.
+ */
+function isBeforeSuperCall(node: ESTree.ThrowStatement, member?: ClassMember): boolean {
+	if (!isMethodDefinitionRaw(member) || member.kind !== "constructor" || !hasSuperClass(member.parent.parent)) {
+		return false;
+	}
+
+	const constructorFunction = member.value;
+	let hasEarlierSuperCall = false;
+	forEachNode(constructorFunction, (current) => {
+		if (current.range[0] >= node.range[0]) return false;
+
+		if (
+			current.range[1] <= node.range[0] &&
+			isSuperCallStatement(current) &&
+			isInFunctionBody(current, constructorFunction)
+		) {
+			hasEarlierSuperCall = true;
+			return STOP_NODE_TRAVERSAL;
+		}
+
+		return undefined;
+	});
+
+	return !hasEarlierSuperCall;
 }
 
 function isPropertyName(node: ESTree.Node): boolean {
@@ -152,6 +202,30 @@ function getReadNames(argument: ESTree.Node): Array<string> {
 	});
 
 	return names;
+}
+
+/**
+ * Adds the names that the scope, or a scope inside it, reads from outside it.
+ * A new `const` of such a name would put those reads in its temporal dead
+ * zone.
+ *
+ * @param scope - The scope the new `const` is declared in.
+ * @param names - The list to add the names to.
+ */
+function pushOuterReadNames(scope: Scope, names: Array<string>): void {
+	const scopes = [scope];
+	const innerScopes = new Set<Scope>();
+	for (const current of scopes) {
+		innerScopes.add(current);
+
+		for (const reference of current.references) {
+			if (!reference.resolved || !innerScopes.has(reference.resolved.scope)) {
+				names.push(reference.identifier.name);
+			}
+		}
+
+		pushChildScopes(scopes, current);
+	}
 }
 
 function getUniqueVariableName(
@@ -294,6 +368,8 @@ const requireThrowErrorCapture = createRule("require-throw-error-capture", "gene
 			if (capturedFunctionName !== undefined) {
 				readNames.push(capturedFunctionName);
 			}
+
+			pushOuterReadNames(scope, readNames);
 
 			const takenNames = new Set([...reservedNames, ...readNames]);
 			const variableName = getUniqueVariableName(scope, node, "error", takenNames);

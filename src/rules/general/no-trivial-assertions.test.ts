@@ -67,6 +67,9 @@ describe("no-trivial-assertions", () => {
 			{ code: "assert.deepStrictEqual({}, {});", errors: [{ messageId: "freshIdentity" }] },
 			{ code: "assert.notDeepStrictEqual([], []);", errors: [{ messageId: "freshIdentity" }] },
 			{ code: "assert.notStrictEqual({}, 1);", errors: [{ messageId: "freshIdentity" }] },
+			// A fresh value never deep-equals a primitive constant
+			{ code: "assert.deepStrictEqual({}, 1);", errors: [{ messageId: "freshIdentity" }] },
+			{ code: "assert.notDeepStrictEqual(1, []);", errors: [{ messageId: "freshIdentity" }] },
 			{ code: "expect(null).toBe(null);", errors: [{ messageId: "issue" }] },
 		],
 		valid: [

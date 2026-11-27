@@ -40,80 +40,98 @@ function isResolvedInScope(name: string, scope: Scope): boolean {
 	return false;
 }
 
-const enum Color {
-	White = 0,
-	Gray = 1,
-	Black = 2,
-}
-
-function markCycleParticipants(path: Array<string>, neighbor: string, inCycle: Set<string>): void {
-	const cycleStart = path.lastIndexOf(neighbor);
-	for (let index = cycleStart; index < path.length; index += 1) {
-		const cycleNode = path[index];
-		/* v8 ignore next -- cycleStart is found from an existing path entry. @preserve */
-		if (cycleNode !== undefined) {
-			inCycle.add(cycleNode);
-		}
-	}
-}
-
-/** A function on the search path, with the callees still to visit. */
-interface SearchFrame {
+/** A function the search has reached, with its Tarjan bookkeeping. */
+interface SearchNode {
 	readonly name: string;
 	readonly callees: Iterator<string>;
+	readonly index: number;
+	lowLink: number;
+	onStack: boolean;
 }
 
-function findCycleParticipants(callGraph: Map<string, Set<string>>): ReadonlySet<string> {
-	const color = new Map<string, Color>();
-	const inCycle = new Set<string>();
+/**
+ * Groups the call graph into its strongly connected components with Tarjan's
+ * algorithm, run on an explicit stack. Two functions are in one component when
+ * each can reach the other, so every call between them is part of a cycle.
+ *
+ * @param callGraph - The callees of every function.
+ * @returns The component of every function that is in a cycle: one of
+ *   several functions, or one that calls itself.
+ */
+function findRecursiveComponents(callGraph: ReadonlyMap<string, ReadonlySet<string>>): ReadonlyMap<string, number> {
+	const reached = new Map<string, SearchNode>();
+	const componentStack = new Array<SearchNode>();
+	const components = new Map<string, number>();
+	const path = new Array<SearchNode>();
 
-	for (const name of callGraph.keys()) {
-		color.set(name, Color.White);
+	function enterFunction(name: string, callees: ReadonlySet<string>): void {
+		const node: SearchNode = {
+			name,
+			callees: callees[Symbol.iterator](),
+			index: reached.size,
+			lowLink: reached.size,
+			onStack: true,
+		};
+
+		reached.set(name, node);
+		componentStack.push(node);
+		path.push(node);
 	}
 
-	/**
-	 * Marks a function as on the search path and opens its callees.
-	 *
-	 * @param name - The function the search enters.
-	 * @param path - The functions on the search path.
-	 * @returns The frame that visits the callees of the function.
-	 */
-	function enterFunction(name: string, path: Array<string>): SearchFrame {
-		color.set(name, Color.Gray);
-		path.push(name);
+	function closeComponent(root: SearchNode): void {
+		const members = componentStack.splice(componentStack.lastIndexOf(root));
+		for (const member of members) {
+			member.onStack = false;
+		}
 
-		/* v8 ignore next -- registered call graph nodes always have an adjacency set. @preserve */
-		const graph = callGraph.get(name) ?? [];
-		return { name, callees: graph[Symbol.iterator]() };
+		if (members.length === 1 && callGraph.get(root.name)?.has(root.name) !== true) return;
+
+		const component = components.size;
+		for (const member of members) {
+			components.set(member.name, component);
+		}
 	}
 
-	for (const name of callGraph.keys()) {
-		if (color.get(name) !== Color.White) continue;
+	function leaveFunction(current: SearchNode): void {
+		path.pop();
+		const caller = path.at(-1);
+		if (caller !== undefined) {
+			caller.lowLink = Math.min(caller.lowLink, current.lowLink);
+		}
 
-		const path = new Array<string>();
-		const frames = new Array<SearchFrame>();
-		let frame: SearchFrame | undefined = enterFunction(name, path);
-		while (frame !== undefined) {
-			const step = frame.callees.next();
-			if (step.done === true) {
-				path.pop();
-				color.set(frame.name, Color.Black);
-				frame = frames.pop();
-				continue;
+		if (current.lowLink === current.index) {
+			closeComponent(current);
+		}
+	}
+
+	function visitCallee(current: SearchNode, callee: string): void {
+		const calleeNode = reached.get(callee);
+		if (calleeNode === undefined) {
+			const callees = callGraph.get(callee);
+			if (callees !== undefined) {
+				enterFunction(callee, callees);
 			}
+		} else if (calleeNode.onStack) {
+			current.lowLink = Math.min(current.lowLink, calleeNode.index);
+		}
+	}
 
-			const neighbor = step.value;
-			const neighborColor = color.get(neighbor);
-			if (neighborColor === Color.Gray) {
-				markCycleParticipants(path, neighbor, inCycle);
-			} else if (neighborColor === Color.White) {
-				frames.push(frame);
-				frame = enterFunction(neighbor, path);
+	for (const [start, startCallees] of callGraph) {
+		if (reached.has(start)) continue;
+
+		enterFunction(start, startCallees);
+
+		for (let current = path.at(-1); current !== undefined; current = path.at(-1)) {
+			const step = current.callees.next();
+			if (step.done === true) {
+				leaveFunction(current);
+			} else {
+				visitCallee(current, step.value);
 			}
 		}
 	}
 
-	return inCycle;
+	return components;
 }
 
 /**
@@ -465,24 +483,14 @@ const noRecursive = createRule("no-recursive", "general", {
 			"Program:exit"(): void {
 				const resolveNode = createNodeResolver(callGraph, methodNames, parentClasses, callSites);
 				const nodeGraph = mergeSharedNodes(callGraph, resolveNode);
-				const inCycle = findCycleParticipants(nodeGraph);
-				// The search marks one cycle per back edge, so extra edges can
-				// change what it marks. Keep every node the first graph marks.
-				const participants =
-					deferredCallSites.length === 0
-						? inCycle
-						: new Set([
-								...inCycle,
-								...findCycleParticipants(addDeferredEdges(nodeGraph, deferredCallSites, resolveNode)),
-							]);
-
-				if (participants.size === 0) return;
+				const components = findRecursiveComponents(addDeferredEdges(nodeGraph, deferredCallSites, resolveNode));
+				if (components.size === 0) return;
 
 				for (const sites of [callSites, deferredCallSites]) {
 					for (const callSite of sites) {
-						const { callee, caller } = callSite;
-						/* v8 ignore next -- call sites are recorded only from graph edges between registered participants. @preserve */
-						if (participants.has(resolveNode(caller)) && participants.has(resolveNode(callee))) {
+						const component = components.get(resolveNode(callSite.caller));
+
+						if (component !== undefined && component === components.get(resolveNode(callSite.callee))) {
 							context.report({
 								messageId: "noRecursive",
 								node: callSite.node,

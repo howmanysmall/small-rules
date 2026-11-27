@@ -193,8 +193,39 @@ describe("no-recursive", () => {
 				].join("\n"),
 				errors: [{ messageId: "noRecursive" }],
 			},
+			{
+				code: [
+					"class First extends Second { run() { this.run(); } }",
+					"class Second extends Third { run() {} }",
+					"class Third extends Second { run() {} }",
+				].join("\n"),
+				errors: [{ messageId: "noRecursive" }],
+			},
+			// A function that reaches a cycle through a finished one is part
+			// of it too
+			{
+				code: "function a() { b(); c(); } function b() { a(); } function c() { b(); }",
+				errors: [
+					{ messageId: "noRecursive" },
+					{ messageId: "noRecursive" },
+					{ messageId: "noRecursive" },
+					{ messageId: "noRecursive" },
+				],
+			},
+			// A call from one cycle into another is not part of either
+			{
+				code: "function a() { b(); } function b() { a(); c(); } function c() { d(); } function d() { c(); }",
+				errors: [
+					{ messageId: "noRecursive" },
+					{ messageId: "noRecursive" },
+					{ messageId: "noRecursive" },
+					{ messageId: "noRecursive" },
+				],
+			},
 		],
 		valid: [
+			// A call to a binding that is not a function adds no cycle
+			"const helper = make(); function start() { helper(); }",
 			// A bare call to an import or a parameter of the same name does
 			// not call the method it sits in
 			'import { log } from "./logger"; export class Logger { log(message) { log(message); } }',
