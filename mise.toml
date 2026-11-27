@@ -20,7 +20,7 @@ bun = "latest"
 communique = "latest"
 direnv = "latest"
 git-cliff = "latest"
-hk = { version = "2.13.0", workflow = "release.yml" }
+hk = { version = "2.14.0", workflow = "release.yml" }
 jactionlint = "latest"
 lychee = "latest"
 ni = "latest"
