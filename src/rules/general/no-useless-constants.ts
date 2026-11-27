@@ -1,5 +1,7 @@
 import {
 	ARRAY_EXPRESSION,
+	ASSIGNMENT_EXPRESSION,
+	AWAIT_EXPRESSION,
 	BINARY_EXPRESSION,
 	CALL_EXPRESSION,
 	CONDITIONAL_EXPRESSION,
@@ -29,8 +31,11 @@ import {
 	OBJECT_EXPRESSION,
 	SEQUENCE_EXPRESSION,
 	SPREAD_ELEMENT,
+	TAGGED_TEMPLATE_EXPRESSION,
 	TEMPLATE_LITERAL,
 	UNARY_EXPRESSION,
+	UPDATE_EXPRESSION,
+	YIELD_EXPRESSION,
 } from "@small-rules/oxlint-utilities";
 
 import {
@@ -60,6 +65,20 @@ const OBJECT_CONSTRUCTOR_PATTERNS: ReadonlyArray<string> = [
 	String.raw`^WeakMap\b`,
 	String.raw`^WeakSet\b`,
 ];
+
+/**
+ * Expressions that can change what a moved initializer reads when they run
+ * before it.
+ */
+const ORDER_SENSITIVE_TYPES: ReadonlySet<string> = new Set([
+	ASSIGNMENT_EXPRESSION,
+	AWAIT_EXPRESSION,
+	CALL_EXPRESSION,
+	NEW_EXPRESSION,
+	TAGGED_TEMPLATE_EXPRESSION,
+	UPDATE_EXPRESSION,
+	YIELD_EXPRESSION,
+]);
 
 interface FixableConstant {
 	readonly name: string;
@@ -106,6 +125,8 @@ function isFunctionLikeInitializer(node: ESTree.Node): boolean {
 
 const OBJECT_LIKE_INITIALIZER_TYPES: ReadonlySet<ESTree.Node["type"]> = new Set([
 	ARRAY_EXPRESSION,
+	ASSIGNMENT_EXPRESSION,
+	AWAIT_EXPRESSION,
 	OBJECT_EXPRESSION,
 	JSX_ELEMENT,
 	JSX_FRAGMENT,
@@ -263,19 +284,20 @@ function containsRange(outer: ESTree.Node, inner: ESTree.Node): boolean {
 
 /**
  * Whether the initializer can move to the reference without reading a value
- * that a call before the reference would have changed. Moving it runs it after
- * everything that comes before the reference in the declaration.
+ * that a call, write, await or yield before the reference would have changed.
+ * Moving it runs it after everything that comes before the reference in the
+ * declaration.
  *
  * @param declaration - The declaration that holds the reference.
  * @param reference - The identifier that would be replaced.
- * @returns Whether no call is evaluated before the reference.
+ * @returns Whether no such expression is evaluated before the reference.
  */
 function isInlineOrderPreserved(declaration: ESTree.VariableDeclaration, reference: ESTree.BindingIdentifier): boolean {
 	let isPreserved = true;
 	forEachNode(declaration, (node) => {
 		if (node.range[0] >= reference.range[1]) return false;
 
-		if (node.range[1] <= reference.range[0] && (isCallExpression(node) || isNewExpression(node))) {
+		if (node.range[1] <= reference.range[0] && ORDER_SENSITIVE_TYPES.has(node.type)) {
 			isPreserved = false;
 			return STOP_NODE_TRAVERSAL;
 		}

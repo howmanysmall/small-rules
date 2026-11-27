@@ -645,6 +645,31 @@ describe("no-useless-constants", () => {
 					output: null,
 					errors: [{ messageId: "uselessConstantNoFix" }],
 				},
+				{
+					code: "function run(counter: number) {\n  const LIMIT = counter;\n  const pair = [counter++, LIMIT];\n  return pair;\n}",
+					output: null,
+					errors: [{ messageId: "uselessConstantNoFix" }],
+				},
+				{
+					code: "function run(counter: number) {\n  const LIMIT = counter;\n  const pair = [(counter = 5), LIMIT];\n  return pair;\n}",
+					output: null,
+					errors: [{ messageId: "uselessConstantNoFix" }],
+				},
+				{
+					code: "declare function bump(parts: TemplateStringsArray): number;\nfunction run(counter: number) {\n  const LIMIT = counter;\n  const pair = [bump``, LIMIT];\n  return pair;\n}",
+					output: null,
+					errors: [{ messageId: "uselessConstantNoFix" }],
+				},
+				{
+					code: "async function run(counter: number, tick: Promise<void>) {\n  const LIMIT = counter;\n  const pair = [await tick, LIMIT];\n  return pair;\n}",
+					output: null,
+					errors: [{ messageId: "uselessConstantNoFix" }],
+				},
+				{
+					code: "function* run(counter: number) {\n  const LIMIT = counter;\n  const pair = [yield, LIMIT];\n  return pair;\n}",
+					output: null,
+					errors: [{ messageId: "uselessConstantNoFix" }],
+				},
 			],
 			valid: [],
 		});

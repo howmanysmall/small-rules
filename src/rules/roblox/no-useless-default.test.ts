@@ -572,6 +572,32 @@ describe("no-useless-default imperative detection", () => {
 					},
 				],
 			},
+			{
+				// An escape through a declaration withholds the fix.
+				code: 'const p = new Instance("Part"); const weld = attach(p); p.Anchored = false;',
+				output: null,
+				errors: [{ data: { className: "Part", propertyName: "Anchored" }, messageId: "uselessDefault" }],
+			},
+			{
+				code: 'const p = new Instance("Part"); if (cond) { p.Anchored = true; } p.Anchored = false;',
+				output: null,
+				errors: [{ data: { className: "Part", propertyName: "Anchored" }, messageId: "uselessDefault" }],
+			},
+			{
+				code: 'const p = new Instance("Part"); void configure(p); p.Anchored = false;',
+				output: null,
+				errors: [{ data: { className: "Part", propertyName: "Anchored" }, messageId: "uselessDefault" }],
+			},
+			{
+				code: 'async function build() { const p = new Instance("Part"); await configure(p); p.Anchored = false; }',
+				output: null,
+				errors: [{ data: { className: "Part", propertyName: "Anchored" }, messageId: "uselessDefault" }],
+			},
+			{
+				code: 'const p = new Instance("Part"); configure(...[p]); p.Anchored = false;',
+				output: null,
+				errors: [{ data: { className: "Part", propertyName: "Anchored" }, messageId: "uselessDefault" }],
+			},
 		],
 		valid: [
 			{ code: 'const frame = new Instance("Frame"); frame.Name = "Container";' },
@@ -610,6 +636,9 @@ describe("no-useless-default imperative detection", () => {
 			{
 				code: 'const className = "UISizeConstraint"; const c = new Instance(className); c.MinSize = new Vector2();',
 			},
+			// An earlier write to the same property means this one resets it.
+			{ code: 'const p = new Instance("Part"); p.Anchored = true; p.Anchored = false;' },
+			{ code: 'const p = new Instance("Part"); const q = p; q.Anchored = true; p.Anchored = false;' },
 		],
 	});
 });

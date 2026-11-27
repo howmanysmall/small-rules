@@ -422,8 +422,137 @@ function Component() {
 					},
 				],
 			},
+			{
+				// A literal-only action still goes after the leading imports.
+				code: `
+import { useReducer } from "react";
+import { reducer } from "./reducer";
+
+function Component() {
+    const [state, dispatch] = useReducer(reducer, 0);
+
+    dispatch({ type: "OPEN" });
+
+    return state;
+}
+`,
+				errors: [
+					{
+						messageId: "preferConstantDispatch",
+						suggestions: [
+							{
+								desc: "Extract to module constant `PREFER_CONSTANT_ACTION_0`",
+								output: `
+import { useReducer } from "react";
+import { reducer } from "./reducer";
+
+const PREFER_CONSTANT_ACTION_0 = { type: "OPEN" };
+
+function Component() {
+    const [state, dispatch] = useReducer(reducer, 0);
+
+    dispatch(PREFER_CONSTANT_ACTION_0);
+
+    return state;
+}
+`,
+							},
+						],
+					},
+				],
+			},
+			{
+				// The constant goes after a directive prologue, not above it.
+				code: `
+"use client";
+
+function Component() {
+    const [state, dispatch] = useReducer(reducer, 0);
+
+    dispatch({ type: "OPEN" });
+
+    return state;
+}
+`,
+				errors: [
+					{
+						messageId: "preferConstantDispatch",
+						suggestions: [
+							{
+								desc: "Extract to module constant `PREFER_CONSTANT_ACTION_0`",
+								output: `
+"use client";
+
+const PREFER_CONSTANT_ACTION_0 = { type: "OPEN" };
+
+function Component() {
+    const [state, dispatch] = useReducer(reducer, 0);
+
+    dispatch(PREFER_CONSTANT_ACTION_0);
+
+    return state;
+}
+`,
+							},
+						],
+					},
+				],
+			},
+			{
+				// A leading directive does not stop later imports from anchoring.
+				code: `
+"use client";
+import { useReducer } from "react";
+
+function Component() {
+    const [state, dispatch] = useReducer(reducer, 0);
+
+    dispatch({ type: "OPEN" });
+
+    return state;
+}
+`,
+				errors: [
+					{
+						messageId: "preferConstantDispatch",
+						suggestions: [
+							{
+								desc: "Extract to module constant `PREFER_CONSTANT_ACTION_0`",
+								output: `
+"use client";
+import { useReducer } from "react";
+
+const PREFER_CONSTANT_ACTION_0 = { type: "OPEN" };
+
+function Component() {
+    const [state, dispatch] = useReducer(reducer, 0);
+
+    dispatch(PREFER_CONSTANT_ACTION_0);
+
+    return state;
+}
+`,
+							},
+						],
+					},
+				],
+			},
 		],
 		valid: [
+			{
+				// A computed key is not a constant action shape.
+				code: `
+const KEY = "type";
+
+function Component() {
+    const [state, dispatch] = useReducer(reducer, 0);
+
+    dispatch({ [KEY]: "x" });
+
+    return state;
+}
+`,
+			},
 			{
 				code: `
 function Component(type) {

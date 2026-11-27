@@ -63,6 +63,12 @@ describe("prefer-udim2-shorthand", () => {
 				errors: [{ messageId: "preferFromScale" }],
 			},
 			{
+				// A negated operand folds to zero, so the offset is still zero.
+				code: "new UDim2(1, -1 + 1, 1, 0);",
+				output: "UDim2.fromScale(1, 1);",
+				errors: [{ messageId: "preferFromScale" }],
+			},
+			{
 				code: "new UDim2(1 * 2, 0, 3 / 4, 0);",
 				output: "UDim2.fromScale(1 * 2, 3 / 4);",
 				errors: [{ messageId: "preferFromScale" }],

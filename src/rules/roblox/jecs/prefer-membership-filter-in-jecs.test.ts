@@ -62,6 +62,16 @@ describe("prefer-membership-filter-in-jecs", () => {
 			},
 			// Reports without a fix when the fix would delete a comment
 			{
+				code: 'import { world } from "@rbxts/jecs";\nconst gameWorld = world();\nfor (const [entity, /* keep */ visual, transform] of gameWorld.query(Visual, Transform)) { render(entity, visual); }',
+				output: null,
+				errors: [{ messageId: "preferMembershipFilter" }],
+			},
+			{
+				code: 'import { world } from "@rbxts/jecs";\nconst gameWorld = world();\nfor (const [entity, visual, transform] of gameWorld.query(Visual, Transform).with(/* keep */)) { render(entity, visual); }',
+				output: null,
+				errors: [{ messageId: "preferMembershipFilter" }],
+			},
+			{
 				code: 'import { world } from "@rbxts/jecs";\nconst gameWorld = world();\nfor (const [entity, visual] of gameWorld.query(Visual, /* tag only */ Transform)) use(entity, visual);',
 				output: null,
 				errors: [{ messageId: "preferMembershipFilter" }],

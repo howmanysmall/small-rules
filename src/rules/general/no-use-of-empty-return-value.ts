@@ -14,12 +14,12 @@ import {
 	isVariableDeclarator,
 } from "@small-rules/oxlint-utilities";
 
-import { getReferencedVariable } from "$oxc-utilities/ast-utilities";
+import { pushChildScopes } from "$oxc-utilities/ast-utilities";
 import { createRule } from "$oxc-utilities/create-rule";
 import { createFunctionStackVisitor } from "$oxc-utilities/function-stack-visitor";
 import { getSingleDefinition } from "$oxc-utilities/single-variable-definition";
 
-import type { ESTree, Variable, Visitor } from "oxlint-plugin-utilities";
+import type { ESTree, Scope, Variable, Visitor } from "oxlint-plugin-utilities";
 
 type FunctionLike = ESTree.ArrowFunctionExpression | ESTree.Function;
 
@@ -67,9 +67,31 @@ function getFunctionFromVariable(variable: Variable): FunctionLike | undefined {
 	return undefined;
 }
 
+/**
+ * Maps every reference identifier in the file to the variable it resolves to,
+ * in one pass over the scope tree. Reading the identifier's own reference keeps
+ * a type-only binding of the same name from hiding the value it calls.
+ *
+ * @param programScope - The scope of the `Program` node.
+ * @returns The resolved variable (or `null`) for each reference identifier.
+ */
+function collectResolvedReferences(programScope: Scope): Map<ESTree.Node, null | Variable> {
+	const resolvedByIdentifier = new Map<ESTree.Node, null | Variable>();
+	const scopes = [programScope];
+	for (const scope of scopes) {
+		for (const reference of scope.references) {
+			resolvedByIdentifier.set(reference.identifier, reference.resolved);
+		}
+
+		pushChildScopes(scopes, scope);
+	}
+
+	return resolvedByIdentifier;
+}
+
 const noUseOfEmptyReturnValue = createRule("no-use-of-empty-return-value", "general", {
 	create(context): Visitor {
-		const callExpressionsToCheck = new Map<ESTree.IdentifierReference, FunctionLike>();
+		const usedCallees = new Array<ESTree.IdentifierReference>();
 		const functionsWithReturnValue = new Set<FunctionLike>();
 		const functionStack = new Array<FunctionLike>();
 
@@ -84,19 +106,20 @@ const noUseOfEmptyReturnValue = createRule("no-use-of-empty-return-value", "gene
 		return {
 			...createFunctionStackVisitor(functionStack, enterFunction),
 			CallExpression(node): void {
-				if (!callReturnValueIsUsed(node) || !isBindingIdentifier(node.callee)) return;
-
-				const resolved = getReferencedVariable(context.sourceCode, node.callee);
-				if (resolved === undefined) return;
-
-				const functionNode = getFunctionFromVariable(resolved);
-				if (functionNode !== undefined) {
-					callExpressionsToCheck.set(node.callee, functionNode);
+				if (callReturnValueIsUsed(node) && isBindingIdentifier(node.callee)) {
+					usedCallees.push(node.callee);
 				}
 			},
-			"Program:exit"(): void {
-				for (const [callee, functionNode] of callExpressionsToCheck) {
-					if (functionsWithReturnValue.has(functionNode)) continue;
+			"Program:exit"(node): void {
+				if (usedCallees.length === 0) return;
+
+				const resolvedByIdentifier = collectResolvedReferences(context.sourceCode.getScope(node));
+				for (const callee of usedCallees) {
+					const resolved = resolvedByIdentifier.get(callee);
+					if (!resolved) continue;
+
+					const functionNode = getFunctionFromVariable(resolved);
+					if (functionNode === undefined || functionsWithReturnValue.has(functionNode)) continue;
 					context.report({
 						data: { name: callee.name },
 						messageId: "removeUseOfOutput",

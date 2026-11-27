@@ -1,7 +1,13 @@
-import { hasShadowedBinding } from "$oxc-utilities/ast-utilities";
+import { isTsInterfaceDeclaration, isTsTypeAliasDeclaration } from "@small-rules/oxlint-utilities";
+
+import { getResolvedVariable } from "$oxc-utilities/ast-utilities";
 import { createRule } from "$oxc-utilities/create-rule";
 
-import type { CreateRule, ESTree, Visitor } from "oxlint-plugin-utilities";
+import type { CreateRule, Definition, ESTree, Visitor } from "oxlint-plugin-utilities";
+
+function isTypeDeclaration({ node }: Definition): boolean {
+	return isTsTypeAliasDeclaration(node) || isTsInterfaceDeclaration(node);
+}
 
 interface BannedGlobalCallRuleOptions<TMessageId extends string> {
 	readonly name: string;
@@ -24,8 +30,10 @@ export function createBannedGlobalCallRule<const TMessageId extends string>(
 			return {
 				[selector](node: ESTree.CallExpression): void {
 					// An import, parameter or local function of the same name
-					// is not the global.
-					if (hasShadowedBinding(sourceCode, node, options.name)) return;
+					// is not the global. A type of that name is not a value,
+					// so the call still reaches the global.
+					const variable = getResolvedVariable(sourceCode, node.callee);
+					if (variable !== undefined && !variable.defs.every(isTypeDeclaration)) return;
 
 					context.report({
 						messageId: options.messageId,

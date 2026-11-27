@@ -11,9 +11,9 @@ import RulePage from "$components/rule-page.astro";
 			overhead even when they don't use the instance. A standalone function is just faster.
 		</p>
 		<p>
-			This catches any non-static method that doesn't reference `this` or `super` anywhere in its body. You can
-			scope it with `checkPrivate`, `checkProtected`, and `checkPublic` if you only care about some visibility
-			levels.
+			This catches any non-static method that never uses its own `this` or `super`. A `this` inside a nested
+			`function`, object method, or class body belongs to that inner code, so it doesn't count. You can scope it
+			with `checkPrivate`, `checkProtected`, and `checkPublic` if you only care about some visibility levels.
 		</p>
 		<p>
 			Won't flag static methods or constructors. Those are fine. Only flags real instance methods that could be

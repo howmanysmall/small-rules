@@ -5,10 +5,8 @@ import {
 	isObjectExpression,
 	isProperty,
 	isTsLiteralType,
-	isTsNumberKeyword,
-	isTsStringKeyword,
-	isTsSymbolKeyword,
 	isTsTypeReference,
+	isTsUnionType,
 } from "@small-rules/oxlint-utilities";
 
 import { createRule } from "$oxc-utilities/create-rule";
@@ -50,16 +48,27 @@ function getRecordEnumTypeParameter(node: ESTree.VariableDeclarator): ESTree.TST
 	return enumType;
 }
 
+// Names that always stand for an open set of keys.
+const OPEN_KEY_TYPE_NAMES = new Set(["PropertyKey"]);
+
 /**
- * Whether the key type has no finite list of members. `Modding.inspect` cannot
- * enumerate one, so rewriting the object would lose its hand-written keys.
+ * Whether the key type has a finite list of members that `Modding.inspect`
+ * can enumerate. Anything else would lose the hand-written keys, so only a
+ * literal, a plain type reference such as an enum, or a union of those counts.
  *
  * @param keyType - The first type argument of the `Record`.
- * @returns `true` for `string`, `number`, and `symbol`.
+ * @returns `true` for a literal, a plain type reference, or a union of those.
  */
-function isOpenKeyType(keyType: ESTree.TSType): boolean {
+function isClosedKeyType(keyType: ESTree.TSType): boolean {
 	const unwrapped = stripParenthesizedType(keyType);
-	return isTsStringKeyword(unwrapped) || isTsNumberKeyword(unwrapped) || isTsSymbolKeyword(unwrapped);
+	if (isTsLiteralType(unwrapped)) return true;
+	if (isTsUnionType(unwrapped)) return unwrapped.types.every(isClosedKeyType);
+
+	return (
+		isTsTypeReference(unwrapped) &&
+		unwrapped.typeArguments === null &&
+		(!isIdentifier(unwrapped.typeName) || !OPEN_KEY_TYPE_NAMES.has(unwrapped.typeName.name))
+	);
 }
 
 function isTrueObjectExpression(node?: ESTree.Expression | null): boolean {
@@ -87,7 +96,7 @@ const preferModdingInspect = createRule("prefer-modding-inspect", "roblox", {
 				if (enumType === undefined) return;
 
 				const enumTypeText = sourceCode.getText(enumType);
-				const isFixWithheld = sourceCode.getCommentsInside(node).length > 0 || isOpenKeyType(enumType);
+				const isFixWithheld = sourceCode.getCommentsInside(node).length > 0 || !isClosedKeyType(enumType);
 
 				context.report({
 					data: { enumType: enumTypeText },

@@ -3,7 +3,6 @@ import {
 	DO_WHILE_STATEMENT,
 	FOR_STATEMENT,
 	IF_STATEMENT,
-	isAnyFunction,
 	isCallExpression,
 	isIdentifier,
 	isLogicalExpression,
@@ -16,11 +15,24 @@ import {
 } from "@small-rules/oxlint-utilities";
 import { Predicate } from "effect";
 
-import { forEachNode, getVariableByName, STOP_NODE_TRAVERSAL } from "$oxc-utilities/ast-utilities";
+import {
+	forEachNode,
+	getVariableByName,
+	hasEagerIdentifierReference,
+	pushChildScopes,
+} from "$oxc-utilities/ast-utilities";
 import { createRule } from "$oxc-utilities/create-rule";
 
 import type { FixReturn, NodeType } from "@small-rules/oxlint-utilities";
-import type { ESTree, Fixer, InferContextFromRule, Reference, SourceCode, Visitor } from "oxlint-plugin-utilities";
+import type {
+	ESTree,
+	Fixer,
+	InferContextFromRule,
+	Reference,
+	Scope,
+	SourceCode,
+	Visitor,
+} from "oxlint-plugin-utilities";
 import type { UnknownRecord } from "type-fest";
 
 type QueryType = "get" | "has";
@@ -206,14 +218,6 @@ function areCallsConsecutive(
 	return ONLY_WHITESPACE_SEMICOLON.test(textBetween);
 }
 
-function hasBufferedVariable(buffer: ReadonlyArray<WorldQueryCall>, name: string): boolean {
-	for (const { variableName } of buffer) {
-		if (variableName === name) return true;
-	}
-
-	return false;
-}
-
 /**
  * A merged call runs before any of the group's variables exist, so a component
  * that reads one of them cannot be merged.
@@ -223,21 +227,9 @@ function hasBufferedVariable(buffer: ReadonlyArray<WorldQueryCall>, name: string
  * @returns Whether the component reads a variable declared by the group.
  */
 function readsBufferedVariable(call: WorldQueryCall, buffer: ReadonlyArray<WorldQueryCall>): boolean {
-	let readsVariable = false;
-
-	forEachNode(call.componentNode, (current) => {
-		// A nested function only reads the variable later, after it exists.
-		if (isAnyFunction(current)) return false;
-
-		if (isIdentifier(current) && hasBufferedVariable(buffer, current.name)) {
-			readsVariable = true;
-			return STOP_NODE_TRAVERSAL;
-		}
-
-		return true;
-	});
-
-	return readsVariable;
+	// A nested function only reads the variable later, after it exists, unless
+	// it is called right away.
+	return buffer.some(({ variableName }) => hasEagerIdentifierReference(call.componentNode, variableName));
 }
 
 function readsGroupVariable(calls: ReadonlyArray<WorldQueryCall>): boolean {
@@ -411,7 +403,43 @@ function findReplaceableChain(
 	}
 
 	if (!isAndExpression(root) || root.range[0] < declarationsEnd || !hasExactLeaves(root, reads)) return undefined;
-	return getVariableByName(sourceCode.getScope(root), MERGED_HAS_NAME) === undefined ? root : undefined;
+	return isMergedNameFree(calls, root, sourceCode) ? root : undefined;
+}
+
+function isUnresolvedMergedNameRead(reference: Reference): boolean {
+	return reference.identifier.name === MERGED_HAS_NAME;
+}
+
+/**
+ * Whether the merged name can be declared: nothing in scope already has it,
+ * and no global read of it sits where the new declaration would shadow it.
+ *
+ * @param calls - The `has` queries being merged.
+ * @param root - The `&&` chain the merged name replaces.
+ * @param sourceCode - The source code that owns the scope analysis.
+ * @returns Whether declaring the merged name changes no other read.
+ */
+function isMergedNameFree(
+	calls: ReadonlyArray<WorldQueryCall>,
+	root: ESTree.LogicalExpression,
+	sourceCode: SourceCode,
+): boolean {
+	if (getVariableByName(sourceCode.getScope(root), MERGED_HAS_NAME) !== undefined) return false;
+
+	return calls.every(
+		({ variableDeclaration }) => !hasUnresolvedMergedNameRead(sourceCode.getScope(variableDeclaration)),
+	);
+}
+
+function hasUnresolvedMergedNameRead(declarationScope: Scope): boolean {
+	// Each scope lists only its own unresolved reads, so walk them all.
+	const scopes = [declarationScope];
+	for (const scope of scopes) {
+		if (scope.through.some(isUnresolvedMergedNameRead)) return true;
+		pushChildScopes(scopes, scope);
+	}
+
+	return false;
 }
 
 function processHasCalls(calls: ReadonlyArray<WorldQueryCall>, context: Context): void {

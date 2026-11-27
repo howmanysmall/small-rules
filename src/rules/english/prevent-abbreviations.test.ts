@@ -1167,6 +1167,16 @@ describe("prevent-abbreviations", () => {
 				output: null,
 				errors: [{ messageId: "replace" }],
 			},
+			{
+				code: "export const Btn = 1;\nconst Handler = class Btn {};\nconsole.log(Btn, Handler);",
+				output: "export const Btn = 1;\nconst Handler = class Button {};\nconsole.log(Btn, Handler);",
+				errors: [{ messageId: "replace" }, { messageId: "replace" }],
+			},
+			{
+				code: "enum Btn {\n\tPrimary,\n}",
+				output: "enum Button {\n\tPrimary,\n}",
+				errors: [{ messageId: "replace" }],
+			},
 		],
 		valid: [],
 	});

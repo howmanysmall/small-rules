@@ -28,7 +28,12 @@ import {
 import { Predicate } from "effect";
 
 import { classHasYieldingMember } from "$oxc-generated/roblox-yielding-members";
-import { forEachNode, getReferencedVariable, hasShadowedBinding } from "$oxc-utilities/ast-utilities";
+import {
+	forEachNode,
+	getReferencedVariable,
+	hasShadowedBinding,
+	hasUninitializedWrite,
+} from "$oxc-utilities/ast-utilities";
 import { createRule } from "$oxc-utilities/create-rule";
 import { getMemberPropertyName, stripExpressionWrappers } from "$oxc-utilities/oxc-utilities";
 import { getSingleConstInitializer, getSingleDefinition } from "$oxc-utilities/single-variable-definition";
@@ -114,9 +119,9 @@ function addSystemPropertyFunction(
 			systemFunctions.add(property.value);
 		} else if (isIdentifier(property.value)) {
 			// The name lookup only knows function declarations and named
-			// expressions, so a `const` arrow resolves through its scope.
+			// expressions, so an arrow bound once resolves through its scope.
 			const systemFunction =
-				namedFunctions.get(property.value.name) ?? getReferencedFunction(property.value, sourceCode);
+				namedFunctions.get(property.value.name) ?? getUnreassignedFunction(property.value, sourceCode);
 
 			if (systemFunction !== undefined) {
 				systemFunctions.add(systemFunction);
@@ -367,6 +372,16 @@ function getReferencedFunction(
 	if (!isVariableDeclarator(definition.node) || definition.node.init === null) return undefined;
 	const initializer = stripExpressionWrappers(definition.node.init);
 	return isAnyFunction(initializer) ? initializer : undefined;
+}
+
+function getUnreassignedFunction(
+	identifier: ESTree.IdentifierReference,
+	sourceCode: SourceCode,
+): CallbackFunction | undefined {
+	// A reassigned binding may no longer hold the function it started with.
+	const variable = getReferencedVariable(sourceCode, identifier);
+	if (variable === undefined || hasUninitializedWrite(variable)) return undefined;
+	return getReferencedFunction(identifier, sourceCode);
 }
 
 function getReferencedCallback(expression: ESTree.Expression, sourceCode: SourceCode): CallbackFunction | undefined {

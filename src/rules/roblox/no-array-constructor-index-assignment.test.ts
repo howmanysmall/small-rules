@@ -122,6 +122,27 @@ describe("no-array-constructor-index-assignment", () => {
 				output: null,
 				errors: [{ messageId: "preferArrayLiteral" }],
 			},
+			// A function that runs at once reads the array before it exists.
+			{
+				code: "const values = new Array<number>();\nvalues[0] = (() => values.size())();",
+				output: null,
+				errors: [{ messageId: "preferArrayLiteral" }],
+			},
+			{
+				code: "const values = new Array<number>();\nvalues[0] = readValues();\nfunction readValues() {\n\treturn values.size();\n}",
+				output: null,
+				errors: [{ messageId: "preferArrayLiteral" }],
+			},
+			{
+				code: "const values = new Array<number>();\nlogValues();\nvalues[0] = 1;\nfunction logValues() {\n\tprint(values.size());\n}",
+				output: null,
+				errors: [{ messageId: "preferArrayLiteral" }],
+			},
+			{
+				code: "const values = new Array<number>();\nvalues[0] = readValues();\nexport function readValues() {\n\treturn values.size();\n}",
+				output: null,
+				errors: [{ messageId: "preferArrayLiteral" }],
+			},
 			{
 				code: "const a = new Array<number>();\na[0] = 1;\na[1] = 2; // two\nexport = a;",
 				output: "const a = [1, 2]; // two\nexport = a;",

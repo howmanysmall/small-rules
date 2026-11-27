@@ -76,6 +76,9 @@ const ACRONYM_PLURAL_PATTERN = /^[A-Z]{2,}s$/u;
 // in S (OS, GPS) names one thing.
 const SHORT_ACRONYM_PATTERN = /^[A-Z]{2,3}$/u;
 
+// A known two-letter acronym with a trailing S is its plural, not an acronym.
+const SHORT_ACRONYM_PLURALS = new Set<string>(["DBS", "IDS", "IPS", "UIS", "VMS"]);
+
 interface AlphaToken {
 	readonly lowercased: string;
 	readonly original: string;
@@ -113,7 +116,10 @@ function getLastAlphaToken(tokens: ReadonlyArray<string>): AlphaToken | undefine
 const E_ENDING_REGEXP = /(?:ches|shes|xes|zes)$/u;
 
 function isPluralWord(word: string, original: string): boolean {
-	if (IRREGULAR_PLURALS.has(word) || PROGRAMMING_PLURALS.has(word)) return true;
+	if (IRREGULAR_PLURALS.has(word) || PROGRAMMING_PLURALS.has(word) || SHORT_ACRONYM_PLURALS.has(original)) {
+		return true;
+	}
+
 	if (SINGULAR_EXCEPTIONS.has(word) || SHORT_ACRONYM_PATTERN.test(original)) return false;
 
 	return (

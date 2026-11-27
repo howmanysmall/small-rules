@@ -1,5 +1,5 @@
 import { describe } from "vitest";
-import { js } from "@small-rules/rule-harness/rule-testers";
+import { js, ts } from "@small-rules/rule-harness/rule-testers";
 
 import rule from "$oxc-rules/roblox/no-warn";
 
@@ -50,5 +50,14 @@ describe("no-warn", () => {
 			"warner();",
 			"warning = true;",
 		],
+	});
+
+	// A type-only binding of the same name does not shadow the global.
+	ts.run("no-warn type bindings", rule, {
+		invalid: [
+			{ code: 'type warn = string;\nwarn("a");', errors: [{ messageId: "noWarn" }] },
+			{ code: 'interface warn {}\nwarn("a");', errors: [{ messageId: "noWarn" }] },
+		],
+		valid: [],
 	});
 });

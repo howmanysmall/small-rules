@@ -45,6 +45,33 @@ describe("prefer-modding-inspect", () => {
 				errors: [{ data: { enumType: "symbol" }, messageId: "preferModdingInspect" }],
 			},
 			{
+				code: `
+const handlers: Record<\`on\${string}\`, true> = { onOpen: true };
+`,
+				output: null,
+				errors: [{ messageId: "preferModdingInspect" }],
+			},
+			{
+				code: "const names: Record<Lowercase<string>, true> = { alpha: true };",
+				output: null,
+				errors: [{ data: { enumType: "Lowercase<string>" }, messageId: "preferModdingInspect" }],
+			},
+			{
+				code: "const keys: Record<PropertyKey, true> = { alpha: true };",
+				output: null,
+				errors: [{ data: { enumType: "PropertyKey" }, messageId: "preferModdingInspect" }],
+			},
+			{
+				code: "const keys: Record<MyEnum | string, true> = { alpha: true };",
+				output: null,
+				errors: [{ data: { enumType: "MyEnum | string" }, messageId: "preferModdingInspect" }],
+			},
+			{
+				code: 'const keys: Record<"alpha" | "beta", true> = { alpha: true, beta: true };',
+				output: 'const keys = Modding.inspect<Record<"alpha" | "beta", true>>();',
+				errors: [{ data: { enumType: '"alpha" | "beta"' }, messageId: "preferModdingInspect" }],
+			},
+			{
 				// The fix would delete the comment, so it is withheld.
 				code: "const x: Record<MyEnum, true> = {\n\ta: true, // red\n\tb: true,\n};",
 				output: null,

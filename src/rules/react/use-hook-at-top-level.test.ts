@@ -475,8 +475,44 @@ function Component() {
 				options: [{ importSources: { React: true } }],
 				errors: [{ messageId: "conditionalHook" }],
 			},
+
+			// A try nested in a finally is still a try block
+			{
+				code: `
+function Component() {
+    try {
+        go();
+    } finally {
+        try {
+            useEffect(() => {});
+        } catch {}
+    }
+    return null;
+}
+`,
+				errors: [{ messageId: "tryBlockHook" }],
+			},
 		],
 		valid: [
+			// A component declared inside an outer function's conditional
+			`
+function outer(flag) {
+    if (flag) {
+        function Inner() {
+            useState(0);
+            return null;
+        }
+    }
+}
+`,
+
+			// A module-level hook call inside an if
+			`
+if (condition) {
+    useFoo();
+}
+`,
+
 			// Basic top-level call
 			{
 				code: `

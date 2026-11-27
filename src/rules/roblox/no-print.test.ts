@@ -1,5 +1,5 @@
 import { describe } from "vitest";
-import { js } from "@small-rules/rule-harness/rule-testers";
+import { js, ts } from "@small-rules/rule-harness/rule-testers";
 
 import rule from "$oxc-rules/roblox/no-print";
 
@@ -50,5 +50,14 @@ describe("no-print", () => {
 			"printer();",
 			"printing = true;",
 		],
+	});
+
+	// A type-only binding of the same name does not shadow the global.
+	ts.run("no-print type bindings", rule, {
+		invalid: [
+			{ code: 'type print = string;\nprint("a");', errors: [{ messageId: "noPrint" }] },
+			{ code: 'interface print {}\nprint("a");', errors: [{ messageId: "noPrint" }] },
+		],
+		valid: [],
 	});
 });

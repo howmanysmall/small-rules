@@ -204,6 +204,15 @@ describe("no-async-in-system", () => {
 				const descriptor = { system: run } satisfies System<Context>;`,
 				errors: [{ messageId: "noAsyncInSystem" }],
 			},
+			// A configured callback parameter pins the receiver type.
+			{
+				code: `import { Events } from "server/network";
+				Events.general.friendUpdated.connect((player) => {
+					const system: SystemFunction = () => player.IsFriendsWithAsync(1);
+				});`,
+				options: inferredPlayerOptions,
+				errors: [{ messageId: "noAsyncInSystem" }],
+			},
 		],
 		valid: [
 			`import { Players } from "@rbxts/services";
@@ -331,6 +340,15 @@ describe("no-async-in-system", () => {
 				options: inferredPlayerOptions,
 			},
 			"let runner: SystemFunction;\nconst { point } = location;",
+			`import { Events } from "server/network";
+				Events.general.friendUpdated.connect((player) => {
+					const system: SystemFunction = () => player.IsFriendsWithAsync(1);
+				});`,
+			// A reassigned `let` may no longer hold the function it started with.
+			`import { Players } from "@rbxts/services";
+				let run = () => { Players.GetFriendsAsync(userId); };
+				run = () => {};
+				const descriptor = { system: run } satisfies System<Context>;`,
 			"const descriptor = { system: 1 } satisfies UnknownConfig;",
 			"const runner = (() => updateWorld()) satisfies SystemFunction;",
 			`function customSystem(): CustomSystemResult {

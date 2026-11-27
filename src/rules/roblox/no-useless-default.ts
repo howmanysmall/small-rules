@@ -2,6 +2,7 @@ import { isBoolean, isString } from "@small-rules/arktype-utilities";
 import {
 	isAnyLiteral,
 	isAssignmentExpression,
+	isAwaitExpression,
 	isBooleanLiteral,
 	isCallExpression,
 	isExpressionStatement,
@@ -193,7 +194,11 @@ function createClassDefaultPropertyLookups(): ReadonlyMap<string, ReadonlyMap<st
 const classDefaultPropertyLookups = createClassDefaultPropertyLookups();
 
 interface TrackedInstance {
+	/** Lowercased names of the properties already written on the instance. */
+	readonly assignedProperties: Set<string>;
 	readonly className: string;
+	/** Cleared once the instance is used in a way the rule cannot follow. */
+	isFixable: boolean;
 }
 
 interface DefaultPropertyMatch {
@@ -748,14 +753,72 @@ function isUselessDefaultAttribute(attribute: ESTree.JSXAttribute, propertyMatch
 function clearTrackedInstancesForCallExpression(
 	callExpression: ESTree.CallExpression,
 	trackedInstances: Map<string, TrackedInstance>,
+	isWrapped: boolean,
 ): void {
-	for (const [identifierName] of trackedInstances) {
+	for (const [identifierName, trackedInstance] of trackedInstances) {
 		for (const argument of callExpression.arguments) {
-			if (isSpreadElement(argument) || !containsIdentifierReference(argument, identifierName)) continue;
+			if (!containsIdentifierReference(argument, identifierName)) continue;
+
+			// A spread or wrapped call still hands the instance over, so the
+			// report stays but the fix is withheld.
+			if (isWrapped || isSpreadElement(argument)) {
+				trackedInstance.isFixable = false;
+				continue;
+			}
 
 			trackedInstances.delete(identifierName);
 			break;
 		}
+	}
+}
+
+function getVoidOrAwaitArgument(expression: ESTree.Expression): ESTree.Expression | undefined {
+	if (isAwaitExpression(expression)) return stripExpressionWrappers(expression.argument);
+
+	if (isUnaryExpression(expression) && expression.operator === "void") {
+		return stripExpressionWrappers(expression.argument);
+	}
+
+	return undefined;
+}
+
+function markReferencedInstancesUnfixable(node: ESTree.Node, trackedInstances: Map<string, TrackedInstance>): void {
+	for (const [identifierName, trackedInstance] of trackedInstances) {
+		if (containsIdentifierReference(node, identifierName)) {
+			trackedInstance.isFixable = false;
+		}
+	}
+}
+
+function recordPropertyAssignment(
+	{ left }: ESTree.AssignmentExpression,
+	trackedInstances: Map<string, TrackedInstance>,
+): void {
+	if (!isMemberExpression(left) || !isIdentifier(left.object)) return;
+
+	const trackedInstance = trackedInstances.get(left.object.name);
+	if (trackedInstance === undefined) return;
+
+	if (left.computed || !isIdentifier(left.property)) {
+		trackedInstance.isFixable = false;
+		return;
+	}
+
+	trackedInstance.assignedProperties.add(left.property.name.toLowerCase());
+}
+
+function clearTrackedInstancesForDeclaration(
+	statementNode: ESTree.VariableDeclaration,
+	trackedInstances: Map<string, TrackedInstance>,
+): void {
+	for (const declaration of statementNode.declarations) {
+		if (declaration.init === null) continue;
+
+		// An alias can write any property, so the instance is no longer followed.
+		const init = stripExpressionWrappers(declaration.init);
+		if (isIdentifier(init) && trackedInstances.delete(init.name)) continue;
+
+		markReferencedInstancesUnfixable(declaration.init, trackedInstances);
 	}
 }
 
@@ -783,7 +846,7 @@ function trackConstInstances(
 		const className = getTrackedInstanceClassName(declaration.init);
 		if (className === undefined) continue;
 
-		trackedInstances.set(declaration.id.name, { className });
+		trackedInstances.set(declaration.id.name, { assignedProperties: new Set(), className, isFixable: true });
 	}
 }
 
@@ -904,14 +967,24 @@ const noUselessDefault = createRule("no-useless-default", "roblox", {
 			if (trackedInstance === undefined) return;
 
 			const propertyName = assignmentExpression.left.property.name;
-			if (isIgnoredPropertyName(propertyName)) return;
+			// A second write to a property resets it, so it is never useless.
+			if (
+				isIgnoredPropertyName(propertyName) ||
+				trackedInstance.assignedProperties.has(propertyName.toLowerCase())
+			) {
+				return;
+			}
 
 			const { className } = trackedInstance;
 			const match = getAssignedDefaultMatch(className, propertyName, assignmentExpression.right);
 			if (match === undefined) return;
 
 			const data = { className, propertyName: match.propertyName };
-			const fix = match.isInstanceDefault ? createExpressionStatementRemovalFix(statementNode) : undefined;
+			const fix =
+				match.isInstanceDefault && trackedInstance.isFixable
+					? createExpressionStatementRemovalFix(statementNode)
+					: undefined;
+
 			if (fix === undefined) {
 				context.report({ data, messageId: "uselessDefault", node: assignmentExpression.left });
 				return;
@@ -946,8 +1019,13 @@ const noUselessDefault = createRule("no-useless-default", "roblox", {
 			}
 
 			if (isVariableDeclaration(statementNode)) {
+				clearTrackedInstancesForDeclaration(statementNode, trackedInstances);
 				trackConstInstances(statementNode, trackedInstances);
+				return;
 			}
+
+			// A nested block or loop can write the instance unseen.
+			markReferencedInstancesUnfixable(statementNode, trackedInstances);
 		}
 
 		function inspectExpressionStatement(
@@ -958,12 +1036,19 @@ const noUselessDefault = createRule("no-useless-default", "roblox", {
 
 			if (isAssignmentExpression(expression)) {
 				reportUselessDefaultAssignment(statementNode, expression, trackedInstances);
+				recordPropertyAssignment(expression, trackedInstances);
 				clearTrackedInstancesForEscapeAssignment(expression, trackedInstances);
 				return;
 			}
 
 			if (isCallExpression(expression)) {
-				clearTrackedInstancesForCallExpression(expression, trackedInstances);
+				clearTrackedInstancesForCallExpression(expression, trackedInstances, false);
+				return;
+			}
+
+			const unwrapped = getVoidOrAwaitArgument(expression);
+			if (unwrapped !== undefined && isCallExpression(unwrapped)) {
+				clearTrackedInstancesForCallExpression(unwrapped, trackedInstances, true);
 			}
 		}
 

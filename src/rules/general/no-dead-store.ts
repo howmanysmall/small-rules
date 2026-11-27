@@ -27,7 +27,7 @@ import {
 	isVariableDeclarator,
 } from "@small-rules/oxlint-utilities";
 
-import { pushChildScopes } from "$oxc-utilities/ast-utilities";
+import { forEachNode, pushChildScopes, STOP_NODE_TRAVERSAL } from "$oxc-utilities/ast-utilities";
 import { createRule } from "$oxc-utilities/create-rule";
 
 import type { ESTree, Reference, Variable, Visitor } from "oxlint-plugin-utilities";
@@ -74,6 +74,9 @@ function getExecutionRoot(node: ESTree.Node): ESTree.Node {
 	return current;
 }
 
+/** The arm prefix of a case test, which runs before any case body. */
+const CASE_TEST_ARM_PREFIX = "test:";
+
 function getCaseArm(switchCase: ESTree.SwitchCase): string {
 	return `case:${switchCase.range[0]}`;
 }
@@ -83,16 +86,46 @@ function endsCase(switchCase: ESTree.SwitchCase): boolean {
 	return last !== undefined && transfersControl(last);
 }
 
+function isJump(node: ESTree.Node): boolean {
+	return isBreakStatement(node) || isContinueStatement(node) || isReturnStatement(node) || isThrowStatement(node);
+}
+
+function hasJump(switchCase: ESTree.SwitchCase): boolean {
+	let found = false;
+	forEachNode(switchCase, (node) => {
+		if (isAnyFunction(node)) return false;
+		if (!isJump(node)) return undefined;
+		found = true;
+		return STOP_NODE_TRAVERSAL;
+	});
+
+	return found;
+}
+
+/**
+ * Which fall-through between switch cases a path check accepts: none, any
+ * that control may take (`"may"`), or only one that control always takes
+ * because no case on the way holds a jump (`"must"`).
+ */
+type Fallthrough = "may" | "must" | "none";
+
 /**
  * Checks whether one case runs on into a later one. A case that does not end
- * in a jump falls through to the next.
+ * in a jump falls through to the next. A case that holds no jump at all always
+ * does.
  *
  * @param control - The switch holding both cases.
  * @param fromArm - The arm of the case that runs first.
  * @param toArm - The arm of the case that may run after it.
+ * @param fallthrough - Whether control may or must reach the later case.
  * @returns `true` when control can flow from the first case to the second.
  */
-function fallsThroughTo(control: ESTree.SwitchStatement, fromArm: string, toArm: string): boolean {
+function fallsThroughTo(
+	control: ESTree.SwitchStatement,
+	fromArm: string,
+	toArm: string,
+	fallthrough: Exclude<Fallthrough, "none">,
+): boolean {
 	let flowing = false;
 	for (const switchCase of control.cases) {
 		const arm = getCaseArm(switchCase);
@@ -102,7 +135,7 @@ function fallsThroughTo(control: ESTree.SwitchStatement, fromArm: string, toArm:
 			return true;
 		}
 
-		flowing &&= !endsCase(switchCase);
+		flowing &&= fallthrough === "must" ? !hasJump(switchCase) : !endsCase(switchCase);
 	}
 
 	return false;
@@ -156,7 +189,7 @@ function getImplicitElseSteps(current: ESTree.Node, parent: ESTree.Node): Readon
 	return steps;
 }
 
-function branchStep(current: ESTree.Node, parent: ESTree.Node): BranchStep | undefined {
+function branchStep(current: ESTree.Node, parent: ESTree.Node, child?: ESTree.Node): BranchStep | undefined {
 	const conditionalStep = getConditionalBranchStep(current, parent);
 	if (conditionalStep !== undefined) return conditionalStep;
 
@@ -169,7 +202,9 @@ function branchStep(current: ESTree.Node, parent: ESTree.Node): BranchStep | und
 	}
 
 	if (isSwitchCase(current) && isSwitchStatement(parent)) {
-		return { arm: getCaseArm(current), complete: false, control: parent };
+		// A case test runs while the switch picks a case, before any case body.
+		const arm = current.test === child ? `${CASE_TEST_ARM_PREFIX}${current.range[0]}` : getCaseArm(current);
+		return { arm, complete: false, control: parent };
 	}
 
 	if (isTryStatement(parent)) {
@@ -188,8 +223,9 @@ function branchStep(current: ESTree.Node, parent: ESTree.Node): BranchStep | und
 function branchPath(node: ESTree.Node, root: ESTree.Node): ReadonlyArray<BranchStep> {
 	const path = new Array<BranchStep>();
 	let current = node;
+	let child: ESTree.Node | undefined;
 	while (current !== root && current.parent !== null) {
-		const step = branchStep(current, current.parent);
+		const step = branchStep(current, current.parent, child);
 		if (step !== undefined) {
 			path.push(step);
 		}
@@ -198,6 +234,7 @@ function branchPath(node: ESTree.Node, root: ESTree.Node): ReadonlyArray<BranchS
 			path.push(elseStep);
 		}
 
+		child = current;
 		current = current.parent;
 	}
 
@@ -208,19 +245,20 @@ function branchArm(path: ReadonlyArray<BranchStep>, control: ESTree.Node): strin
 	return path.find((step) => step.control === control)?.arm;
 }
 
-function isReachableArm(step: BranchStep, rightArm: string, allowFallthrough: boolean): boolean {
-	if (rightArm === step.arm) return true;
-	return allowFallthrough && isSwitchStatement(step.control) && fallsThroughTo(step.control, step.arm, rightArm);
+function isReachableArm(step: BranchStep, rightArm: string, fallthrough: Fallthrough): boolean {
+	if (rightArm === step.arm || step.arm.startsWith(CASE_TEST_ARM_PREFIX)) return true;
+	if (fallthrough === "none" || !isSwitchStatement(step.control)) return false;
+	return fallsThroughTo(step.control, step.arm, rightArm, fallthrough);
 }
 
 function arePathsCompatible(
 	left: ReadonlyArray<BranchStep>,
 	right: ReadonlyArray<BranchStep>,
-	allowFallthrough = false,
+	fallthrough: Fallthrough = "none",
 ): boolean {
 	for (const step of left) {
 		const rightArm = branchArm(right, step.control);
-		if (rightArm !== undefined && !isReachableArm(step, rightArm, allowFallthrough)) return false;
+		if (rightArm !== undefined && !isReachableArm(step, rightArm, fallthrough)) return false;
 	}
 
 	return true;
@@ -369,15 +407,51 @@ function checkObservation(
 
 	const referencePath = branchPath(usage.node, root);
 	if (arePathsCompatible(currentPath, referencePath)) {
-		if (observesPreviousValue(usage, usages)) return true;
-		if (usage.isWrite && isGuaranteedOverwrite(referencePath, currentPath, coveredPaths)) return false;
-		return undefined;
+		return checkReachedUsage(usage, usages, currentPath, referencePath, coveredPaths, "none");
 	}
 
-	// A write only reaches a later case's read when the cases fall through. A
-	// later write is not an overwrite on that path: the case may be skipped.
-	if (observesPreviousValue(usage, usages) && arePathsCompatible(currentPath, referencePath, true)) return true;
+	// A write only reaches a later case when the cases fall through. A later
+	// write there replaces the value only when nothing on the way can jump out.
+	const result = arePathsCompatible(currentPath, referencePath, "may")
+		? checkReachedUsage(usage, usages, currentPath, referencePath, coveredPaths, "must")
+		: undefined;
+
+	if (result !== undefined) return result;
+
 	return isReadAcrossLoop(usage, write, root) ? true : undefined;
+}
+
+/**
+ * Checks a usage that the write reaches: whether it reads the written value,
+ * or replaces it on every path first.
+ *
+ * @param usage - The later usage.
+ * @param usages - Every usage of the variable.
+ * @param currentPath - The branch path of the write.
+ * @param referencePath - The branch path of the usage.
+ * @param coveredPaths - The paths on which a later write already replaced
+ *   the value.
+ * @param overwriteFallthrough - The fall-through a replacing write must be
+ *   reached by.
+ * @returns `true` when the value is read, `false` when it is replaced first,
+ *   and `undefined` otherwise.
+ */
+function checkReachedUsage(
+	usage: VariableUsage,
+	usages: ReadonlyArray<VariableUsage>,
+	currentPath: ReadonlyArray<BranchStep>,
+	referencePath: ReadonlyArray<BranchStep>,
+	coveredPaths: Array<ReadonlyArray<BranchStep>>,
+	overwriteFallthrough: Fallthrough,
+): boolean | undefined {
+	if (observesPreviousValue(usage, usages)) return true;
+
+	const isOverwrite =
+		usage.isWrite &&
+		arePathsCompatible(currentPath, referencePath, overwriteFallthrough) &&
+		isGuaranteedOverwrite(referencePath, currentPath, coveredPaths);
+
+	return isOverwrite ? false : undefined;
 }
 
 function valueIsObserved(write: VariableUsage, usages: ReadonlyArray<VariableUsage>): boolean {

@@ -12,6 +12,7 @@ import {
 
 import { isGlobalArrayConstructor } from "$oxc-utilities/api-provenance";
 import {
+	collectFunctionDeclarations,
 	forEachNode,
 	hasCommentInRange,
 	hasEagerIdentifierReference,
@@ -156,6 +157,41 @@ function collectNextAssignment(
 	return true;
 }
 
+/**
+ * Whether the rewrite would read the array before the literal exists: an
+ * assigned value reads it, or a statement the fix moves above the declaration
+ * calls a hoisted function that reads it.
+ *
+ * @param statements - The statements of the block.
+ * @param declarationIndex - Where the array declaration sits in the block.
+ * @param firstAssignment - Where the run of assignments starts.
+ * @param foundAssignments - The run of index assignments.
+ * @param arrayIdentifierName - The name the array is bound to.
+ * @returns Whether any of that code reads the array.
+ */
+function readsArrayEarly(
+	statements: ReadonlyArray<ProgramStatement>,
+	declarationIndex: number,
+	firstAssignment: ESTree.ExpressionStatement,
+	foundAssignments: ReadonlyArray<FoundAssignment>,
+	arrayIdentifierName: string,
+): boolean {
+	const functions = collectFunctionDeclarations(statements);
+	const movedStatements = statements.slice(declarationIndex + 1, statements.indexOf(firstAssignment));
+	const readsInMovedStatement = movedStatements.some((statement) =>
+		hasEagerIdentifierReference(statement, arrayIdentifierName, { functionDeclarations: functions }),
+	);
+
+	return (
+		readsInMovedStatement ||
+		foundAssignments.some((found) =>
+			hasEagerIdentifierReference(found.expression.right, arrayIdentifierName, {
+				functionDeclarations: functions,
+			}),
+		)
+	);
+}
+
 function getCandidate(
 	sourceCode: SourceCode,
 	statements: ReadonlyArray<ProgramStatement>,
@@ -191,9 +227,7 @@ function getCandidate(
 			sourceCode.getCommentsInside(declarator.init).length > 0 ||
 			hasCommentInRange(sourceCode, firstFound.statement.range[0], lastFound.statement.range[1]),
 		lastAssignmentStatement: lastFound.statement,
-		readsArray: foundAssignments.some((found) =>
-			hasEagerIdentifierReference(found.expression.right, arrayIdentifierName),
-		),
+		readsArray: readsArrayEarly(statements, index, firstFound.statement, foundAssignments, arrayIdentifierName),
 	};
 }
 

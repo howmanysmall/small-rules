@@ -53,6 +53,11 @@ describe("prefer-singular-enums", () => {
 			// An all-caps word or a lowercase-s acronym is still a plural
 			{ code: "enum USERS {}", errors: [errorWithName("USERS")] },
 			{ code: "enum UserIDs {}", errors: [errorWithName("UserIDs")] },
+
+			// A known short acronym with a trailing S is that acronym's plural
+			{ code: "enum USER_IDS {}", errors: [errorWithName("USER_IDS")] },
+			{ code: "enum UserIDS {}", errors: [errorWithName("UserIDS")] },
+			{ code: "enum IDS {}", errors: [errorWithName("IDS")] },
 		],
 		valid: [
 			{ code: "enum _ {Value}" },

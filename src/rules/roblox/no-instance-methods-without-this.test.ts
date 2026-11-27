@@ -290,6 +290,17 @@ class MyClass {
 }
 `,
 			},
+			{
+				code: `
+class MyClass {
+    private run(): unknown {
+        return class {
+            accessor [this.key] = 1;
+        };
+    }
+}
+`,
+			},
 			// Method with this in nested function
 			{
 				code: `

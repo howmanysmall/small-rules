@@ -156,18 +156,34 @@ function isBlockDisableOpenAt(
 }
 
 /**
+ * Finds the statement before the statement-list entry that starts at the same
+ * position as `node`, so comments before `node` are judged against it too.
+ *
+ * @param node - A node whose leading comments are being read.
+ * @returns The previous statement, if `node` shares its statement's first token.
+ */
+function getPreviousStatementOfStart(node: ESTree.Node): ESTree.Node | undefined {
+	let current = node;
+	while (true) {
+		const statements = getStatementList(current);
+		if (statements?.includes(current) === true) return statements[statements.indexOf(current) - 1];
+
+		const { parent } = current;
+		if (parent?.range[0] !== node.range[0]) return undefined;
+		current = parent;
+	}
+}
+
+/**
  * Tells whether a comment trails the statement before `owner` on its last line.
  * Such a comment belongs to that statement, not to `owner`.
  *
  * @param comment - A comment found before `owner`.
- * @param owner - The statement the comment may be mistaken for a lead of.
+ * @param owner - The node the comment may be mistaken for a lead of.
  * @returns Whether the comment ends the previous statement's line.
  */
 function isTrailingCommentOfPreviousStatement(comment: SourceCodeComment, owner: ESTree.Node): boolean {
-	const statements = getStatementList(owner);
-	if (statements === undefined) return false;
-
-	const previous = statements[statements.indexOf(owner) - 1];
+	const previous = getPreviousStatementOfStart(owner);
 	return (
 		previous !== undefined &&
 		comment.range[0] >= previous.range[1] &&

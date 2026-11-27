@@ -4,6 +4,8 @@ import {
 	isAnyFunction,
 	isArrayExpression,
 	isCallExpression,
+	isExportNamedDeclaration,
+	isFunctionDeclarationRaw,
 	isIdentifier,
 	isIdentifierNamed,
 	isImportDeclaration,
@@ -11,6 +13,7 @@ import {
 	isNewExpression,
 	isNode,
 	isObjectExpression,
+	isParenthesizedExpression,
 	isProperty,
 	isSpreadElement,
 	isStringLiteral,
@@ -122,34 +125,84 @@ export function forEachNode(
 	}
 }
 
+const NO_FUNCTION_DECLARATIONS: ReadonlyMap<string, ESTree.Function> = new Map();
+
+interface EagerReferenceOptions {
+	/** Hoisted functions that a call by name runs at once. */
+	readonly functionDeclarations?: ReadonlyMap<string, ESTree.Function>;
+	/** A descendant whose subtree the search ignores. */
+	readonly skippedNode?: ESTree.Node;
+}
+
+/**
+ * Collects the function declarations among a list of statements by name,
+ * including exported ones. These are hoisted, so a call can run them before
+ * the code that declares them.
+ *
+ * @param statements - The statements of one block or program.
+ * @returns The declared functions, keyed by name.
+ */
+export function collectFunctionDeclarations(
+	statements: ReadonlyArray<ESTree.Node>,
+): ReadonlyMap<string, ESTree.Function> {
+	const functions = new Map<string, ESTree.Function>();
+	for (const statement of statements) {
+		const declaration = isExportNamedDeclaration(statement) ? statement.declaration : statement;
+		if (isFunctionDeclarationRaw(declaration) && declaration.id !== null) {
+			functions.set(declaration.id.name, declaration);
+		}
+	}
+
+	return functions;
+}
+
 /**
  * Whether a node reads an identifier before any nested function could run. A
- * nested function only reads it later, so the walk does not enter one.
+ * nested function only reads it later, so the walk does not enter one, unless
+ * the function is called right away: an immediately invoked function, or a
+ * call to one of the given hoisted function declarations.
  *
  * @param root - The node to search.
  * @param identifierName - The name to look for.
- * @param skippedNode - A descendant whose subtree the search ignores.
+ * @param options - What else shapes the search.
  * @returns Whether the identifier is read immediately.
  */
 export function hasEagerIdentifierReference(
 	root: ESTree.Node,
 	identifierName: string,
-	skippedNode?: ESTree.Node,
+	{ functionDeclarations = NO_FUNCTION_DECLARATIONS, skippedNode }: EagerReferenceOptions = {},
 ): boolean {
-	let hasReference = false;
+	const workList = [root];
+	const calledFunctions = new Set<ESTree.Node>();
 
-	forEachNode(root, (current) => {
-		if (current === skippedNode || isAnyFunction(current)) return false;
-
-		if (isIdentifierNamed(current, identifierName)) {
-			hasReference = true;
-			return STOP_NODE_TRAVERSAL;
+	function addCalledFunction(callee: ESTree.Node): void {
+		const target = isParenthesizedExpression(callee) ? callee.expression : callee;
+		if (isAnyFunction(target)) {
+			calledFunctions.add(target);
+			return;
 		}
 
-		return true;
-	});
+		if (!isIdentifier(target)) return;
 
-	return hasReference;
+		const declaration = functionDeclarations.get(target.name);
+		if (declaration === undefined || calledFunctions.has(declaration)) return;
+
+		calledFunctions.add(declaration);
+		workList.push(declaration);
+	}
+
+	for (const current of workList) {
+		if (current === skippedNode || (isAnyFunction(current) && !calledFunctions.has(current))) continue;
+		if (isIdentifierNamed(current, identifierName)) return true;
+
+		if (isCallExpression(current)) {
+			addCalledFunction(current.callee);
+		}
+
+		pushNodeChildren(current, workList);
+	}
+
+	return false;
 }
 
 /**

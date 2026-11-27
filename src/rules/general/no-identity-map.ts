@@ -1,12 +1,15 @@
 import {
 	BLOCK_STATEMENT,
 	IDENTIFIER,
+	isArrayExpression,
 	isArrowFunctionExpression,
 	isAssignmentPattern,
 	isCallExpression,
 	isFunctionExpression,
 	isIdentifier,
 	isMemberExpression,
+	isNewExpression,
+	isProperty,
 	isReturnStatement,
 	isSpreadElement,
 	isVariableDeclarator,
@@ -14,7 +17,12 @@ import {
 
 import { getVariableByName } from "$oxc-utilities/ast-utilities";
 import { createRule } from "$oxc-utilities/create-rule";
-import { getMemberPropertyName } from "$oxc-utilities/oxc-utilities";
+import {
+	getListElementText,
+	getMemberPropertyName,
+	getReceiverText,
+	stripParenthesis,
+} from "$oxc-utilities/oxc-utilities";
 import { getHookName } from "$oxc-utilities/react-hook-utilities";
 
 import type { ESTree, SourceCode, Visitor } from "oxlint-plugin-utilities";
@@ -162,6 +170,25 @@ function isReceiverOfIdentityMap(node: ESTree.CallExpression, ignoreDefaultParam
 	);
 }
 
+/**
+ * Whether any expression other than a comma expression may stand where the
+ * call is, so the receiver needs no parentheses there.
+ *
+ * @param node - The identity map call that the fix replaces.
+ * @returns Whether the call is a declarator initializer, property, array
+ *   element or call argument.
+ */
+function isUnrestrictedSlot(node: ESTree.CallExpression): boolean {
+	const { parent } = node;
+	if (isVariableDeclarator(parent) || isProperty(parent) || isArrayExpression(parent)) return true;
+	return (isCallExpression(parent) || isNewExpression(parent)) && parent.callee !== node;
+}
+
+function getReplacementText(sourceCode: SourceCode, node: ESTree.CallExpression, receiver: ESTree.Expression): string {
+	if (!isUnrestrictedSlot(node)) return getReceiverText(sourceCode, receiver);
+	return getListElementText(sourceCode, stripParenthesis(receiver));
+}
+
 const noIdentityMap = createRule("no-identity-map", "general", {
 	create(context): Visitor {
 		const { sourceCode } = context;
@@ -196,7 +223,7 @@ const noIdentityMap = createRule("no-identity-map", "general", {
 
 				context.report({
 					fix(fixer) {
-						return fixer.replaceText(node, sourceCode.getText(receiver));
+						return fixer.replaceText(node, getReplacementText(sourceCode, node, receiver));
 					},
 					messageId,
 					node,
