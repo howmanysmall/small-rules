@@ -18,8 +18,7 @@
 		"@small-rules/oxlint-utilities": "workspace:*",
 		"effect": "catalog:runtime",
 		"oxlint-plugin-utilities": "catalog:runtime",
-		"yuku-ast": "catalog:tooling",
-		"yuku-parser": "catalog:runtime"
+		"yuku": "catalog:runtime"
 	},
 	"devDependencies": {
 		"@small-rules/rule-harness": "workspace:*",

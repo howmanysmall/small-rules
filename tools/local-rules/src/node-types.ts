@@ -1,4 +1,4 @@
-import { CHILD_KEYS } from "yuku-ast";
+import { CHILD_KEYS } from "yuku";
 
 export const NODE_TYPES: ReadonlyArray<string> = Object.keys(CHILD_KEYS);
 

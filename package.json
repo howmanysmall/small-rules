@@ -101,7 +101,7 @@
 		"minimatch": "catalog:runtime",
 		"oxc-resolver": "catalog:runtime",
 		"oxlint-plugin-utilities": "catalog:runtime",
-		"yuku-parser": "catalog:runtime"
+		"yuku": "catalog:runtime"
 	},
 	"devDependencies": {
 		"@arethetypeswrong/core": "catalog:build",

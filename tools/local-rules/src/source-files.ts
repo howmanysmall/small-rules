@@ -1,7 +1,7 @@
 import { readdirSync } from "node:fs";
 
 import type { ESTree } from "oxlint-plugin-utilities";
-import type { Node as YukuNode } from "yuku-parser";
+import type { Node as YukuNode } from "yuku";
 
 // Declaration files and tests never reach the bundle.
 const BUNDLED_SOURCE = /(?<!\.d|\.test)\.tsx?$/v;

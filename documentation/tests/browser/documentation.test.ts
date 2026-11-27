@@ -351,7 +351,7 @@ playwrightIt("keeps build-only code out of browser assets", async ({ page }) => 
 	);
 	const browserCode = scriptBodies.join("\n");
 	for (const forbiddenText of [
-		"yuku-parser",
+		"yuku",
 		"vitest",
 		"documentation-rule-extractor",
 		"src/rules/roblox/no-print",

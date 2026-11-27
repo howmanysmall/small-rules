@@ -1,6 +1,5 @@
 import { Predicate } from "effect";
-import { walk } from "yuku-ast";
-import { parse } from "yuku-parser";
+import { parse, walk } from "yuku";
 
 import { ExtractionError } from "../classes/extraction-error";
 
@@ -14,7 +13,7 @@ import type {
 	ObjectProperty,
 	PropertyKey,
 	TemplateLiteral,
-} from "yuku-parser";
+} from "yuku";
 
 import type { ExtractionContext } from "../classes/extraction-error";
 

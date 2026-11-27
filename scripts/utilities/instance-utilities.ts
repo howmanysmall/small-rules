@@ -2,10 +2,9 @@ import { readFile } from "node:fs/promises";
 import { compareWithLocale } from "@small-rules/string-utilities/compare-with-locale";
 import { Predicate } from "effect";
 import { fdir } from "fdir";
-import { walk } from "yuku-ast";
-import { parse } from "yuku-parser";
+import { parse, walk } from "yuku";
 
-import type { CallExpression, JSXElementName, JSXMemberExpression, JSXOpeningElement } from "yuku-parser";
+import type { CallExpression, JSXElementName, JSXMemberExpression, JSXOpeningElement } from "yuku";
 
 // biome-ignore assist/source/useSortedEnumMembers: compatibility issue
 export const enum ScanType {
