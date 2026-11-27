@@ -1,10 +1,15 @@
+import { execFileSync } from "node:child_process";
 import { defineConfig } from "bumpp";
 
 const configuration = defineConfig({
-	all: true,
 	commit: true,
 	confirm: true,
-	execute: "node --run changelog:version",
+	execute(operation) {
+		execFileSync("node", ["--run", "changelog:version"], { stdio: "inherit" });
+		// bumpp only commits the files it knows it updated.
+		operation.update({ updatedFiles: [...operation.state.updatedFiles, "CHANGELOG.md"] });
+	},
+	noGitCheck: false,
 	push: true,
 	tag: true,
 });
