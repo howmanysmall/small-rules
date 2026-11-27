@@ -46,6 +46,18 @@ All notable changes to `@pobammer-ts/small-rules` are documented here.
 - Add oxlint configuration file
 - **oxlint:** Enable array constructor lint rules
 
+## [3.13.2] - 2026-11-27
+
+## Fixed
+- Fixed `no-dead-store`, `no-recursive` and other rules to restore lost reports and withhold unsafe autofixes ([#132](https://github.com/howmanysmall/small-rules/pull/132)).
+- `no-print` and `no-warn` no longer treat a type or interface with the same name as a shadowing binding ([#132](https://github.com/howmanysmall/small-rules/pull/132)).
+- `prefer-singular-enums` reports `DBS`, `IDS`, `IPS`, `UIS`, and `VMS` with a trailing `S` as plurals ([#132](https://github.com/howmanysmall/small-rules/pull/132)).
+
+## Changed
+- `no-dead-store` reports a fall-through overwrite only when no case on the way jumps out ([#132](https://github.com/howmanysmall/small-rules/pull/132)).
+- `no-recursive` reports every function in a call cycle, including cycles reached through finished functions ([#132](https://github.com/howmanysmall/small-rules/pull/132)).
+- `no-trivial-assertions` reports deep comparisons of a fresh value with a primitive constant ([#132](https://github.com/howmanysmall/small-rules/pull/132)).
+
 ## [3.13.1] - 2026-11-27
 
 ## Fixed
