@@ -12,6 +12,7 @@ entry = [
 ignorePatterns = ["tests/fixtures/**", "plugins/**", "src/generated/**", ".benchmarks/**", ".opencode/**", ".claude/**"]
 ignoreBinaries = ["hk", "nr"]
 ignoreDependencies = [
+	"@arethetypeswrong/core",
 	"@astrojs/markdown-satteri",
 	"@e18e/eslint-plugin",
 	"@fontsource-variable/ibm-plex-sans",
@@ -23,15 +24,22 @@ ignoreDependencies = [
 	"eslint-plugin-better-max-params",
 	"eslint-plugin-comment-length",
 	"eslint-plugin-de-morgan",
+	"eslint-plugin-eslint-plugin",
 	"eslint-plugin-flawless",
+	"eslint-plugin-jest-extended",
 	"eslint-plugin-jsdoc",
+	"eslint-plugin-n",
 	"eslint-plugin-oxfmt",
 	"eslint-plugin-perfectionist",
 	"eslint-plugin-pnpm",
+	"eslint-plugin-react-jsx",
+	"eslint-plugin-react-naming-convention",
+	"eslint-plugin-react-x",
 	"eslint-plugin-roblox-ts",
 	"eslint-plugin-sonarjs",
 	"eslint-plugin-unicorn",
 	"eslint-plugin-unused-imports",
+	"oxc-transform-react",
 	"sharp",
 ]
 ignoreExportsUsedInFile = true
