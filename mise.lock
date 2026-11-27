@@ -126,6 +126,10 @@ url = "https://github.com/oven-sh/bun/releases/download/bun-v1.4.5/bun-windows-x
 version = "1.8.0"
 backend = "packslip:github.com/jdx/communique"
 specifiers = ["latest"]
+unsupported_platforms = [
+    "macos-x64",
+    "macos-x64-baseline",
+]
 
 [tools.communique."platforms.linux-arm64"]
 checksum = "sha256:365f67f2bb21f31966d265ad42516fb14e423411e36fadab8f99002046a6310e"
@@ -415,6 +419,10 @@ url_api = "https://api.github.com/repos/vale-cli/vale-ls/releases/assets/6038817
 version = "2.14.0"
 backend = "packslip:github.com/jdx/hk"
 specifiers = ["2.14.0"]
+unsupported_platforms = [
+    "macos-x64",
+    "macos-x64-baseline",
+]
 
 [tools.hk."platforms.linux-arm64"]
 checksum = "sha256:a5503bc4a6cef77697aed92c966f7b444b3fdea4b62b63d9fb0b2b1af7f08c83"
