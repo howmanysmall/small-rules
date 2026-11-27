@@ -1,5 +1,7 @@
 {
 	"$schema": "./node_modules/turbo/schema.json",
+	"cacheMaxAge": "7d",
+	"cacheMaxSize": "1GB",
 	"futureFlags": {
 		"affectedUsingTaskInputs": true,
 		"githubActionsRemoteBaseRefFallback": true

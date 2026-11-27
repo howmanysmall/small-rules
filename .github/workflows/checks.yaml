@@ -39,12 +39,19 @@ jobs:
             ${{ runner.os }}-eslint-v1-${{ hashFiles('pnpm-lock.yaml', 'eslint.config.ts') }}-
 
       - name: Restore Turborepo cache
-        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
-          key: ${{ runner.os }}-turbo-${{ github.job }}-${{ github.sha }}
+          key: ${{ runner.os }}-turbo-${{ github.job }}-${{ github.sha }}-${{ github.run_attempt }}
           path: .turbo/cache
           restore-keys: |
             ${{ runner.os }}-turbo-${{ github.job }}-
+
+      - id: turbo-before
+        name: Snapshot Turborepo cache
+        run: |
+          hash=$({ find .turbo/cache -type f 2>/dev/null || true; } | sort | sha256sum)
+          echo "hash=$hash" >> "$GITHUB_OUTPUT"
+        shell: bash
 
       - name: Collect changed files
         run: git diff --name-only --diff-filter=ACMRT -z "$BASE_SHA...$HEAD_SHA" > "$RUNNER_TEMP/changed-files"
@@ -93,6 +100,24 @@ jobs:
           # writes, while a cache hit restores it.
           - name: Build
             run: pnpm exec turbo run build --filter=// -- --minify && test -f dist/index.js
+
+      # Saved even when a later step failed: turbo only writes tasks that
+      # succeeded, so the entries are good. Skipped when nothing new was cached,
+      # so unchanged runs do not store another copy against the repository quota.
+      - id: turbo-after
+        if: ${{ !cancelled() }}
+        name: Detect new Turborepo cache entries
+        run: |
+          hash=$({ find .turbo/cache -type f 2>/dev/null || true; } | sort | sha256sum)
+          echo "hash=$hash" >> "$GITHUB_OUTPUT"
+        shell: bash
+
+      - if: ${{ !cancelled() && steps.turbo-after.outputs.hash != steps.turbo-before.outputs.hash }}
+        name: Save Turborepo cache
+        uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          key: ${{ runner.os }}-turbo-${{ github.job }}-${{ github.sha }}-${{ github.run_attempt }}
+          path: .turbo/cache
     timeout-minutes: 15
 
   documentation:
@@ -116,12 +141,19 @@ jobs:
         uses: $/.github/actions/install
 
       - name: Restore Turborepo cache
-        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
-          key: ${{ runner.os }}-turbo-${{ github.job }}-${{ github.sha }}
+          key: ${{ runner.os }}-turbo-${{ github.job }}-${{ github.sha }}-${{ github.run_attempt }}
           path: .turbo/cache
           restore-keys: |
             ${{ runner.os }}-turbo-${{ github.job }}-
+
+      - id: turbo-before
+        name: Snapshot Turborepo cache
+        run: |
+          hash=$({ find .turbo/cache -type f 2>/dev/null || true; } | sort | sha256sum)
+          echo "hash=$hash" >> "$GITHUB_OUTPUT"
+        shell: bash
 
       - name: Restore Chromium cache
         uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
@@ -145,6 +177,23 @@ jobs:
 
       - name: Test documentation in Chromium
         run: pnpm exec turbo run test:browser --filter=@small-rules/documentation --affected
+      # Saved even when a later step failed: turbo only writes tasks that
+      # succeeded, so the entries are good. Skipped when nothing new was cached,
+      # so unchanged runs do not store another copy against the repository quota.
+      - id: turbo-after
+        if: ${{ !cancelled() }}
+        name: Detect new Turborepo cache entries
+        run: |
+          hash=$({ find .turbo/cache -type f 2>/dev/null || true; } | sort | sha256sum)
+          echo "hash=$hash" >> "$GITHUB_OUTPUT"
+        shell: bash
+
+      - if: ${{ !cancelled() && steps.turbo-after.outputs.hash != steps.turbo-before.outputs.hash }}
+        name: Save Turborepo cache
+        uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          key: ${{ runner.os }}-turbo-${{ github.job }}-${{ github.sha }}-${{ github.run_attempt }}
+          path: .turbo/cache
     timeout-minutes: 15
 
   test:
@@ -168,12 +217,19 @@ jobs:
         uses: $/.github/actions/install
 
       - name: Restore Turborepo cache
-        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
-          key: ${{ runner.os }}-turbo-${{ github.job }}-${{ github.sha }}
+          key: ${{ runner.os }}-turbo-${{ github.job }}-${{ github.sha }}-${{ github.run_attempt }}
           path: .turbo/cache
           restore-keys: |
             ${{ runner.os }}-turbo-${{ github.job }}-
+
+      - id: turbo-before
+        name: Snapshot Turborepo cache
+        run: |
+          hash=$({ find .turbo/cache -type f 2>/dev/null || true; } | sort | sha256sum)
+          echo "hash=$hash" >> "$GITHUB_OUTPUT"
+        shell: bash
 
       - parallel:
           - name: Run tests
@@ -192,4 +248,21 @@ jobs:
             coverage/coverage-final.json
             coverage/coverage-summary.json
           retention-days: 7
+      # Saved even when a later step failed: turbo only writes tasks that
+      # succeeded, so the entries are good. Skipped when nothing new was cached,
+      # so unchanged runs do not store another copy against the repository quota.
+      - id: turbo-after
+        if: ${{ !cancelled() }}
+        name: Detect new Turborepo cache entries
+        run: |
+          hash=$({ find .turbo/cache -type f 2>/dev/null || true; } | sort | sha256sum)
+          echo "hash=$hash" >> "$GITHUB_OUTPUT"
+        shell: bash
+
+      - if: ${{ !cancelled() && steps.turbo-after.outputs.hash != steps.turbo-before.outputs.hash }}
+        name: Save Turborepo cache
+        uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          key: ${{ runner.os }}-turbo-${{ github.job }}-${{ github.sha }}-${{ github.run_attempt }}
+          path: .turbo/cache
     timeout-minutes: 15
