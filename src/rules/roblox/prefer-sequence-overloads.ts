@@ -208,9 +208,12 @@ const preferSequenceOverloads = createRule("prefer-sequence-overloads", "roblox"
 
 				if (replacement === undefined) return;
 
+				// The rewrite keeps only the values and drops comments.
+				const hasComment = context.sourceCode.getCommentsInside(node).length > 0;
+
 				context.report({
 					fix(fixer): Fix | undefined {
-						return replacement.replacement === undefined
+						return hasComment || replacement.replacement === undefined
 							? undefined
 							: fixer.replaceText(node, replacement.replacement);
 					},

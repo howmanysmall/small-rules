@@ -324,6 +324,34 @@ const items = [() => items.length];
 				],
 			},
 			{
+				code: `
+const items = new Array<number>();
+items.push((() => items.size())());
+`,
+				output: null,
+				errors: [{ messageId: "collapseArrayPushInitialization", suggestions: [] }],
+			},
+			{
+				code: `
+const items = new Array<number>();
+items.push(readItems());
+function readItems() {
+	return items.size();
+}
+`,
+				output: null,
+				errors: [{ messageId: "collapseArrayPushInitialization", suggestions: [] }],
+			},
+			{
+				code: `
+const v = new Array<number>();
+v.push(v.size());
+v.push(1);
+`,
+				output: null,
+				errors: [{ messageId: "collapseArrayPushInitialization", suggestions: [] }],
+			},
+			{
 				code: "const { values }: { values: string } = new Array();",
 				output: null,
 				errors: [{ messageId: "requireExplicitGenericOnNewArray" }],

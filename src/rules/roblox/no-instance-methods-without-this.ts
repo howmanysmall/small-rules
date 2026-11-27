@@ -1,4 +1,5 @@
 import {
+	isAccessorProperty,
 	isClass,
 	isFunctionDeclaration,
 	isFunctionExpression,
@@ -62,7 +63,10 @@ function pushClassHeader(node: ESTree.Class, worklist: Array<ESTree.Node>): void
 	}
 
 	for (const member of node.body.body) {
-		if ((isMethodDefinition(member) || isPropertyDefinition(member)) && member.computed) {
+		if (
+			(isMethodDefinition(member) || isPropertyDefinition(member) || isAccessorProperty(member)) &&
+			member.computed
+		) {
 			worklist.push(member.key);
 		}
 	}

@@ -10,7 +10,7 @@ import {
 } from "@small-rules/oxlint-utilities";
 
 import { isJecsWorldExpression } from "$oxc-utilities/api-provenance";
-import { getVariableByName } from "$oxc-utilities/ast-utilities";
+import { getVariableByName, hasCommentInRange } from "$oxc-utilities/ast-utilities";
 import { createRule } from "$oxc-utilities/create-rule";
 
 import type { ESTree, Fix, Fixer, SourceCode, Variable, Visitor } from "oxlint-plugin-utilities";
@@ -201,6 +201,28 @@ function createFixes(candidate: MembershipCandidate, { getText }: SourceCode, fi
 	return fixes;
 }
 
+/**
+ * Whether the fix would delete a comment. It rewrites the destructuring
+ * pattern, the query arguments, and an empty `.with()` call.
+ *
+ * @param candidate - The loop the fix rewrites.
+ * @param sourceCode - The source code that owns the comments.
+ * @returns Whether a comment sits in rewritten text.
+ */
+function hasRewrittenComment(candidate: MembershipCandidate, sourceCode: SourceCode): boolean {
+	if (
+		sourceCode.getCommentsInside(candidate.pattern).length > 0 ||
+		hasCommentInRange(sourceCode, candidate.firstQueryArgument.range[0], candidate.lastQueryArgument.range[1])
+	) {
+		return true;
+	}
+
+	const { withCall } = candidate.chain;
+	return (
+		withCall?.arguments.length === 0 && hasCommentInRange(sourceCode, withCall.callee.range[1], withCall.range[1])
+	);
+}
+
 const preferMembershipFilterInJecs = createRule("prefer-membership-filter-in-jecs", "roblox/jecs", {
 	create(context): Visitor {
 		const { sourceCode } = context;
@@ -209,14 +231,7 @@ const preferMembershipFilterInJecs = createRule("prefer-membership-filter-in-jec
 				const candidate = getCandidate(sourceCode, node);
 				if (candidate === undefined) return;
 
-				const [argumentsStart] = candidate.firstQueryArgument.range;
-				const [, argumentsEnd] = candidate.lastQueryArgument.range;
-				// Rewriting the arguments would delete comments among them.
-				const hasArgumentComment = sourceCode
-					.getCommentsInside(candidate.chain.queryCall)
-					.some(({ range }) => range[0] > argumentsStart && range[1] < argumentsEnd);
-
-				if (!hasArgumentComment && candidate.movedArguments.every(isSafeToMove)) {
+				if (!hasRewrittenComment(candidate, sourceCode) && candidate.movedArguments.every(isSafeToMove)) {
 					context.report({
 						fix: (fixer) => createFixes(candidate, sourceCode, fixer),
 						messageId: "preferMembershipFilter",

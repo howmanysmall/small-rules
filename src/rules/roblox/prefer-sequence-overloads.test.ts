@@ -67,6 +67,17 @@ describe("prefer-sequence-overloads", () => {
 				output: null,
 				errors: [{ messageId: "preferSingleOverload" }],
 			},
+			// The rewrite would drop the comment.
+			{
+				code: "new NumberSequence(0.5 /* start */, 0.5);",
+				output: null,
+				errors: [{ messageId: "preferSingleOverload" }],
+			},
+			{
+				code: "new NumberSequence([new NumberSequenceKeypoint(0, 0), /* end */ new NumberSequenceKeypoint(1, 1)]);",
+				output: null,
+				errors: [{ messageId: "preferTwoPointOverload" }],
+			},
 			{
 				code: "new ColorSequence(next(), next());",
 				output: null,

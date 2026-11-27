@@ -26,7 +26,11 @@ import {
 import { Predicate } from "effect";
 
 import { isGlobalArrayConstructor } from "$oxc-utilities/api-provenance";
-import { hasCommentInRange, hasEagerIdentifierReference } from "$oxc-utilities/ast-utilities";
+import {
+	collectFunctionDeclarations,
+	hasCommentInRange,
+	hasEagerIdentifierReference,
+} from "$oxc-utilities/ast-utilities";
 import { createRule } from "$oxc-utilities/create-rule";
 import { isExpressionSideEffectSafe } from "$oxc-utilities/expression-safety";
 import { getListElementText, getMemberPropertyName, stripExpressionWrappers } from "$oxc-utilities/oxc-utilities";
@@ -509,6 +513,7 @@ function scanPushStatements(
 	let lastPushEnd = 0;
 	let readsArray = false;
 	let scanIndex = startIndex;
+	let functions: ReadonlyMap<string, ESTree.Function> | undefined;
 
 	while (scanIndex < statements.length) {
 		const nextStatement = statements[scanIndex];
@@ -525,7 +530,12 @@ function scanPushStatements(
 		hasUnsafeArgument = appendPushArguments(sourceCode, pushCall, argumentParts) || hasUnsafeArgument;
 		// A push that reads the array reads it before the literal exists. The
 		// callee is the push itself, so it is skipped.
-		readsArray = hasEagerIdentifierReference(pushCall, arrayIdentifierName, pushCall.callee) || readsArray;
+		functions ??= collectFunctionDeclarations(statements);
+		readsArray =
+			hasEagerIdentifierReference(pushCall, arrayIdentifierName, {
+				functionDeclarations: functions,
+				skippedNode: pushCall.callee,
+			}) || readsArray;
 		[, lastPushEnd] = nextStatement.range;
 		scanIndex += 1;
 	}

@@ -257,6 +257,25 @@ const [first, second] = world.get(entity, First, () => first);
 `,
 				errors: [{ messageId: "preferSingleGet" }],
 			},
+			// An immediately invoked function reads the result right away
+			{
+				code: `
+const first = world.get(entity, First);
+const second = world.get(entity, (() => first)());
+`,
+				output: null,
+				errors: [{ messageId: "preferSingleGet" }],
+			},
+			// The merged name would shadow a global read in the chain's block
+			{
+				code: `
+const hasA = world.has(entity, ComponentA);
+const hasB = world.has(entity, ComponentB);
+if (hasA && hasB) { print(hasAll); }
+`,
+				output: null,
+				errors: [{ messageId: "preferSingleHas" }],
+			},
 			// Reports without a fix while a merged flag is still read elsewhere
 			{
 				code: `
