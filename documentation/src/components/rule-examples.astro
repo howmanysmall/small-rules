@@ -13,9 +13,15 @@ interface Props {
 const { exemption, rule } = Astro.props;
 const examples = ruleExamples.get(rule) ?? [];
 
+const codeLanguages: ReadonlyMap<string, "js" | "jsx" | "ts" | "tsx"> = new Map([
+	["js", "js"],
+	["jsx", "jsx"],
+	["ts", "ts"],
+	["tsx", "tsx"],
+]);
+
 function getCodeLanguage(language?: string): "js" | "jsx" | "ts" | "tsx" {
-	if (language === "js" || language === "jsx" || language === "ts" || language === "tsx") return language;
-	return "ts";
+	return codeLanguages.get(language ?? "") ?? "ts";
 }
 ---
 

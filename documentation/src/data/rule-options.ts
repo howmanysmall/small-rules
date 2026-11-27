@@ -275,27 +275,26 @@ function getObjectSchemaType(schema: SchemaRecord): string {
 	return "Record<string, unknown>";
 }
 
+function getSchemaTypeOrUnknown(schema: SchemaInput): string {
+	return isSchemaRecord(schema) ? getSchemaType(schema) : "unknown";
+}
+
+function getArraySchemaType(schema: SchemaRecord): string {
+	if (isJsonArray(schema.items)) return `[${schema.items.map(getSchemaTypeOrUnknown).join(", ")}]`;
+	return `Array<${getSchemaTypeOrUnknown(schema.items)}>`;
+}
+
 function getSchemaType(schema: SchemaRecord): string {
 	if (schema.const !== undefined) return JSON.stringify(schema.const);
 
 	if (isJsonArray(schema.enum)) return schema.enum.map((entry) => JSON.stringify(entry)).join(" | ");
 
-	if (isJsonArray(schema.oneOf)) {
-		return schema.oneOf.map((entry) => (isSchemaRecord(entry) ? getSchemaType(entry) : "unknown")).join(" | ");
-	}
+	if (isJsonArray(schema.oneOf)) return schema.oneOf.map(getSchemaTypeOrUnknown).join(" | ");
 
-	if (isJsonArray(schema.anyOf)) {
-		return schema.anyOf.map((entry) => (isSchemaRecord(entry) ? getSchemaType(entry) : "unknown")).join(" | ");
-	}
+	if (isJsonArray(schema.anyOf)) return schema.anyOf.map(getSchemaTypeOrUnknown).join(" | ");
 
 	const typeNames = getSchemaTypeNames(schema);
-	if (typeNames.includes("array")) {
-		if (isJsonArray(schema.items)) {
-			return `[${schema.items.map((item) => (isSchemaRecord(item) ? getSchemaType(item) : "unknown")).join(", ")}]`;
-		}
-
-		return `Array<${isSchemaRecord(schema.items) ? getSchemaType(schema.items) : "unknown"}>`;
-	}
+	if (typeNames.includes("array")) return getArraySchemaType(schema);
 
 	if (typeNames.includes("object")) return getObjectSchemaType(schema);
 
@@ -364,16 +363,13 @@ function createObjectPlaceholder(schema: SchemaRecord, hint?: string): JsonValue
 	return placeholder;
 }
 
-function createPlaceholder(schema: SchemaInput, hint?: string): JsonValue {
-	if (!isSchemaRecord(schema)) {
-		return {};
-	}
+function createArrayPlaceholder(schema: SchemaRecord, hint?: string): JsonValue {
+	return schema.items === undefined ? [] : [createPlaceholder(schema.items, hint)];
+}
 
-	const explicitPlaceholder = getExplicitPlaceholder(schema, hint);
-	if (explicitPlaceholder !== undefined) return explicitPlaceholder;
-
+function createTypedPlaceholder(schema: SchemaRecord, hint?: string): JsonValue {
 	const typeNames = getSchemaTypeNames(schema);
-	if (typeNames.includes("array")) return schema.items === undefined ? [] : [createPlaceholder(schema.items, hint)];
+	if (typeNames.includes("array")) return createArrayPlaceholder(schema, hint);
 
 	if (typeNames.includes("boolean")) return false;
 
@@ -384,6 +380,17 @@ function createPlaceholder(schema: SchemaInput, hint?: string): JsonValue {
 	if (typeNames.includes("string")) return createStringPlaceholder(hint);
 
 	return {};
+}
+
+function createPlaceholder(schema: SchemaInput, hint?: string): JsonValue {
+	if (!isSchemaRecord(schema)) {
+		return {};
+	}
+
+	const explicitPlaceholder = getExplicitPlaceholder(schema, hint);
+	if (explicitPlaceholder !== undefined) return explicitPlaceholder;
+
+	return createTypedPlaceholder(schema, hint);
 }
 
 function createObjectOptions(schema: SchemaRecord): ReadonlyArray<ObjectOption> {
