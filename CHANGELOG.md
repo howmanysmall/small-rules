@@ -46,6 +46,11 @@ All notable changes to `@pobammer-ts/small-rules` are documented here.
 - Add oxlint configuration file
 - **oxlint:** Enable array constructor lint rules
 
+## [3.13.1] - 2026-11-27
+
+## Fixed
+- **use-exhaustive-dependencies**: `useEffectEvent` and `React.useEffectEvent` results are treated as stable and no longer required in effect dependency arrays. ([#125](https://github.com/howmanysmall/small-rules/pull/125))
+
 ## [3.13.0] - 2026-11-18
 
 This release removes false positives and unsafe autofixes across general, react, roblox, english, and naming rules, and adds the `ignoreDefaultParameters` option to `no-identity-map`. A few rules now report code they previously passed, including `no-recursive` for mutual recursion through `this`.
