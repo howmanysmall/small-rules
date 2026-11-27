@@ -642,6 +642,30 @@ function makeComponent() {
 					options: [{ environment: "standard", inlineFunctionDeclarations: true }],
 					errors: [{ messageId: "identifierReferencesFunctionDeclaration" }],
 				},
+				// A function's own locals never block the inline fix
+				{
+					code: `
+function logValue() {
+    const label = "x";
+    console.log(label);
+}
+export function App() {
+    useEffect(logValue, []);
+    return null;
+}
+`,
+					output: `
+export function App() {
+    useEffect(function logValue() {
+    const label = "x";
+    console.log(label);
+}, []);
+    return null;
+}
+`,
+					options: [{ environment: "standard", inlineFunctionDeclarations: true }],
+					errors: [{ messageId: "identifierReferencesFunctionDeclaration" }],
+				},
 				// Async declarations keep the async report without a fix
 				{
 					code: `

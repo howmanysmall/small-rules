@@ -3,6 +3,7 @@ import {
 	isAnyLiteral,
 	isArrayPattern,
 	isCallExpression,
+	isExpressionStatement,
 	isIdentifier,
 	isImportDeclaration,
 	isMemberExpression,
@@ -156,9 +157,14 @@ function getReferencedDefinitionStarts(sourceCode: SourceCode, actionObject: EST
 	return starts;
 }
 
+function isDirective(statement: ESTree.Program["body"][number]): boolean {
+	return isExpressionStatement(statement) && statement.directive !== undefined && statement.directive !== null;
+}
+
 /**
  * Finds the last top-level statement the new constant has to follow: the
- * leading imports and every statement declaring a binding the object reads.
+ * leading directives and imports, and every statement declaring a binding the
+ * object reads.
  *
  * @param program - The program that owns the action object.
  * @param definitionStarts - Start offsets of the referenced definitions.
@@ -169,11 +175,11 @@ function getInsertionAnchor(
 	definitionStarts: ReadonlyArray<number>,
 ): ESTree.Program["body"][number] | undefined {
 	let anchor: ESTree.Program["body"][number] | undefined;
-	let inLeadingImports = true;
+	let inLeadingStatements = true;
 
 	for (const statement of program.body) {
-		inLeadingImports &&= isImportDeclaration(statement);
-		if (inLeadingImports) {
+		inLeadingStatements &&= isImportDeclaration(statement) || isDirective(statement);
+		if (inLeadingStatements) {
 			anchor = statement;
 			continue;
 		}

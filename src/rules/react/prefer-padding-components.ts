@@ -206,8 +206,8 @@ function getPaddingMessageId(paddingAttributes: PaddingAttributes): MessageId | 
 
 	if (allEqual) return "preferEqualPadding";
 
-	const horizontalEqual = areStructurallyEqual(top, bottom);
-	const verticalEqual = areStructurallyEqual(left, right);
+	const horizontalEqual = areStructurallyEqual(left, right);
+	const verticalEqual = areStructurallyEqual(top, bottom);
 	return horizontalEqual && verticalEqual ? "preferDirectionalPadding" : undefined;
 }
 

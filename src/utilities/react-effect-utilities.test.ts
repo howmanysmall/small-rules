@@ -265,4 +265,27 @@ const Child = ({ onChanged }) => {
 			},
 		],
 	});
+
+	// A named function expression is not a custom hook, even when its own
+	// name starts with "use".
+	tsx.run("no-derived-state", noDerivedState, {
+		invalid: [],
+		valid: [
+			{
+				code: `
+import { useEffect, useState } from "@rbxts/react";
+
+const helper = function useThing({ value }) {
+  const [doubled, setDoubled] = useState(0);
+
+  useEffect(() => {
+    setDoubled(value * 2);
+  }, [value]);
+
+  return doubled;
+};
+`,
+			},
+		],
+	});
 });

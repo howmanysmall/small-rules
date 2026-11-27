@@ -1149,18 +1149,6 @@ const useExhaustiveDependencies = createRule("use-exhaustive-dependencies", "rea
 			stableHooks.set(customHook.name, convertStableResult(customHook.stableResult));
 		}
 
-		const scopeCache = new WeakMap<ESTree.Node, Scope>();
-
-		function getScope(node: ESTree.Node): Scope {
-			const cached = scopeCache.get(node);
-			/* v8 ignore next -- @preserve closure resolution does not request the same cached scope twice in current traversal paths. */
-			if (cached) return cached;
-
-			const scope = context.sourceCode.getScope(node);
-			scopeCache.set(node, scope);
-			return scope;
-		}
-
 		function resolveClosureFunction(
 			closureArgument: ESTree.Node,
 			callExpression: ESTree.CallExpression,
@@ -1168,7 +1156,7 @@ const useExhaustiveDependencies = createRule("use-exhaustive-dependencies", "rea
 			if (isCallbackFunction(closureArgument)) return closureArgument;
 			if (!isIdentifier(closureArgument)) return undefined;
 
-			const resolved = resolveFunctionReference(closureArgument, getScope(callExpression));
+			const resolved = resolveFunctionReference(closureArgument, context.sourceCode.getScope(callExpression));
 			return isCallbackFunctionNode(resolved) ? resolved : undefined;
 		}
 

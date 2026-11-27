@@ -2122,6 +2122,22 @@ function Component() {
 				],
 			},
 
+			// Disable reportMissingDependenciesArray with a prop capture
+			{
+				code: `
+function Component({ a }) {
+    useEffect(() => {
+        console.log(a);
+    });
+}
+`,
+				options: [
+					{
+						reportMissingDependenciesArray: false,
+					},
+				],
+			},
+
 			// Custom hook with correct dependencies
 			{
 				code: `
