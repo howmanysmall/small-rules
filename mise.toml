@@ -199,7 +199,7 @@ complete "tag" run="git tag --sort=-creatordate 2>/dev/null"
 """
 run = """
 GITHUB_TOKEN="$(gh auth token)" OPENAI_API_KEY="${OPENAI_API_KEY:-$OPENROUTER_API_KEY}" \
-	communique generate --config communique.toml --github-release "${usage_tag?}" --changelog CHANGELOG.md --max-tokens "${usage_max_tokens:-131072}"
+	communique generate --config communique.toml --github-release --changelog "${usage_tag?}" --max-tokens "${usage_max_tokens:-131072}"
 """
 
 [tasks.release-status]
