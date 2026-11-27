@@ -4,7 +4,7 @@
 //
 // Modifications: adapted to the local createRule API and path aliases; uses
 // repository AST guards and the shared iterative lexical alias resolver;
-// enqueues parenthesized types preserved by yuku-parser and union members.
+// enqueues parenthesized types preserved by yuku and union members.
 
 import { isTsParenthesizedType, isTsUnionType, isTsUnknownKeyword } from "@small-rules/oxlint-utilities";
 

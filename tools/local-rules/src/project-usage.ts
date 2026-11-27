@@ -1,8 +1,7 @@
 import { readFileSync } from "node:fs";
 import nodePath from "node:path";
 import { ARRAY_EXPRESSION, BINARY_EXPRESSION, SWITCH_STATEMENT } from "@small-rules/oxlint-utilities";
-import { walk } from "yuku-ast";
-import { langFromPath, parse } from "yuku-parser";
+import { parse, walk } from "yuku";
 
 import { collectArrayNodeTypes, collectCaseNodeTypes, collectComparedNodeTypes } from "./inline-node-types.ts";
 import { isOfType, listBundledSources } from "./source-files.ts";
@@ -34,7 +33,7 @@ interface ProjectScan {
 }
 
 export function countInlineNodeTypes(source: string, filename: string): Map<string, number> {
-	const { program } = parse(source, { lang: langFromPath(filename), sourceType: "module" });
+	const { program } = parse(source, { path: filename, sourceType: "module" });
 	const literals = new Array<ESTree.StringLiteral>();
 	walk(program, {
 		enter(node) {

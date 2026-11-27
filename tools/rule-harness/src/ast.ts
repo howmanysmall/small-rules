@@ -1,7 +1,7 @@
 // oxlint-disable unicorn/no-null -- ESTree Program parents use null sentinels.
 
 import { Predicate } from "effect";
-import { CHILD_KEYS } from "yuku-ast";
+import { CHILD_KEYS } from "yuku";
 
 import { HarnessError } from "./harness-error";
 import { getLocationForRange } from "./locations";

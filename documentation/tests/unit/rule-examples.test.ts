@@ -3,15 +3,14 @@ import { cwd } from "node:process";
 import { describe, it } from "vitest";
 import { Predicate } from "effect";
 import { RuleTester } from "oxlint/plugins-dev";
-import { walk } from "yuku-ast";
-import { parse } from "yuku-parser";
+import { parse, walk } from "yuku";
 
 import { ruleExamples } from "$data/rule-examples";
 import { ruleManifest } from "$data/rule-manifest";
 import smallRules from "$small-rules";
 import { formatExampleSnippetAsync } from "$utilities/format-rule-example";
 
-import type { Node, Program } from "yuku-parser";
+import type { Node, Program } from "yuku";
 
 import type { RuleExample } from "$utilities/extract-rule-examples";
 

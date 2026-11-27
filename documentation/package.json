@@ -31,8 +31,7 @@
 		"shiki": "catalog:frontend",
 		"simple-icons": "catalog:frontend",
 		"type-fest": "catalog:types",
-		"yuku-ast": "catalog:tooling",
-		"yuku-parser": "catalog:runtime"
+		"yuku": "catalog:runtime"
 	},
 	"devDependencies": {
 		"@astrojs/check": "catalog:frontend",

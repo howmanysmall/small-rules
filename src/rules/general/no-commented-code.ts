@@ -13,7 +13,7 @@ import {
 	LABELED_STATEMENT,
 } from "@small-rules/oxlint-utilities";
 import { Predicate } from "effect";
-import { parse } from "yuku-parser";
+import { parse } from "yuku";
 
 import { createRule } from "$oxc-utilities/create-rule";
 import { hasCodeLines } from "$oxc-utilities/recognizers/code-recognizer";
@@ -179,7 +179,7 @@ function isExclusion(statements: ReadonlyArray<ESTree.Statement>, codeText: stri
 	);
 }
 
-const ALLOWED_PARSE_ERROR_PATTERNS = [/'return' statement is only valid inside a function/u] as const;
+const ALLOWED_PARSE_ERROR_PATTERNS = [/'return' statement can only be used within a function body/u] as const;
 
 type Errors = ReadonlyArray<{ readonly message: string }>;
 

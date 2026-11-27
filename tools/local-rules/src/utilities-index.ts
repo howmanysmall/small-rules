@@ -10,7 +10,7 @@ import {
 	isTsSatisfiesExpression,
 	isVariableDeclaration,
 } from "@small-rules/oxlint-utilities";
-import { parse } from "yuku-parser";
+import { parse } from "yuku";
 
 import { isNodeTypeName } from "./node-types.ts";
 import { isOfType, listBundledSources } from "./source-files.ts";
